@@ -23,7 +23,7 @@ export default function Login() {
     const t = setInterval(() => {
       if (window.turnstile && tsRef.current && !tsId.current) {
         tsId.current = window.turnstile.render(tsRef.current, {
-          sitekey: import.meta.env.VITE_TURNSTILE_SITE_KEY || '1x00000000000000000000AA',
+          sitekey: '0x4AAAAAADYmCs4M4HZbuWER',
           callback: (token: string) => setTsToken(token),
           'expired-callback': () => setTsToken(''),
           theme: 'dark',
