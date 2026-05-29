@@ -46,6 +46,22 @@ export async function onRequestPost({ request, env }) {
 
   if (error || !user) return err('Gagal membuat akun, coba lagi');
 
+  // Daftarkan user ke NexusGGR
+  try {
+    await fetch('https://api.nexusggr.com', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        method: 'user_create',
+        agent_code: env.NEXUS_AGENT_CODE,
+        agent_token: env.NEXUS_AGENT_TOKEN,
+        user_code: user.username,
+      }),
+    });
+  } catch (e) {
+    console.error('NexusGGR user_create error:', e);
+  }
+
   const token = await signJWT({ sub: user.id, username: user.username, role: user.role }, env.JWT_SECRET);
 
   return ok({
