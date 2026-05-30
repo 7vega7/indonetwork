@@ -1,10 +1,7 @@
 // @ts-nocheck
-import { ok, err, getAuth, nexus } from '../_utils';
+import { ok, err, nexus } from '../_utils';
 
 export async function onRequestGet({ request, env }) {
-  const auth = await getAuth(request, env);
-  if (!auth) return err('Tidak terautentikasi', 401);
-
   const url = new URL(request.url);
   const provider = url.searchParams.get('provider');
   if (!provider) return err('Parameter provider diperlukan');
@@ -17,7 +14,9 @@ export async function onRequestGet({ request, env }) {
     provider,
     games: (data.games || []).map(g => ({
       kode: g.game_code,
-      nama: typeof g.game_name === 'string' ? g.game_name : (g.game_name?.id || g.game_name?.en || g.game_code),
+      nama: typeof g.game_name === 'string'
+        ? g.game_name
+        : (g.game_name?.en || g.game_name?.id || g.game_code),
       banner: g.banner || null,
     }))
   });

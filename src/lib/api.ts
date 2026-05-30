@@ -34,3 +34,12 @@ export const userApi = {
 export const depositApi = {
   buat: (jumlah: number, metode: string) => post<any>('/deposit/buat', { jumlah, metode }),
 }
+
+import { formatNamaGame } from './utils'
+
+export function formatGame(game: any) {
+  return {
+    ...game,
+    nama: formatNamaGame(game.nama)
+  }
+}
