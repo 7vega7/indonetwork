@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { gameApi } from '../lib/api'
-import { HOT_GAMES } from '../lib/hotgames'
 import toast from 'react-hot-toast'
 
 const SLIDES = [
@@ -19,33 +18,56 @@ const PEMENANG_AWAL = [
   { nama: 'eko***o', game: 'Starlight Princess', jumlah: 987000 },
 ]
 
+// Kode game langsung dari API
+const HOT_GAMES = [
+  { nama: 'Gates of Olympus 1000', provider: 'PRAGMATIC', kode: 'vs20olympgate', badge: 'HOT' },
+  { nama: 'Sweet Bonanza 1000', provider: 'PRAGMATIC', kode: 'vs20fruitswx', badge: 'HOT' },
+  { nama: 'Starlight Princess 1000', provider: 'PRAGMATIC', kode: 'vs20starlight', badge: 'HOT' },
+  { nama: 'Sugar Rush 1000', provider: 'PRAGMATIC', kode: 'vs20sugarrush', badge: 'HOT' },
+  { nama: 'Big Bass Bonanza', provider: 'PRAGMATIC', kode: 'vs10bbbonanza', badge: '' },
+  { nama: 'Mahjong Ways 2', provider: 'PGSOFT', kode: 'mahjong-ways2', badge: 'HOT' },
+  { nama: 'Treasures of Aztec', provider: 'PGSOFT', kode: 'treasures-aztec', badge: '' },
+  { nama: 'Wild Bounty Showdown', provider: 'PGSOFT', kode: 'wild-bounty-sd', badge: '' },
+  { nama: 'Fortune Goddess', provider: 'FACHAI', kode: 'fortune-goddess', badge: 'BARU' },
+  { nama: 'Hot Hot Fruit', provider: 'HABANERO', kode: 'SGHotHotFruit', badge: '' },
+]
+
 export default function Beranda() {
   const { isLoggedIn } = useAuth()
   const navigate = useNavigate()
   const [slide, setSlide] = useState(0)
   const [pemenang, setPemenang] = useState(PEMENANG_AWAL)
-  const [banners, setBanners] = useState<Record<string, string>>({})
+  const [hotGames, setHotGames] = useState<any[]>([])
+  const [loadingHot, setLoadingHot] = useState(true)
 
-  // Load banner dari API untuk setiap provider unik
   useEffect(() => {
-    const loadBanners = async () => {
-      const providers = [...new Set(HOT_GAMES.map(g => g.provider))]
-      const bannerMap: Record<string, string> = {}
+    const loadHotGames = async () => {
+      setLoadingHot(true)
+      try {
+        const providers = [...new Set(HOT_GAMES.map(g => g.provider))]
+        const allGames: Record<string, any[]> = {}
 
-      await Promise.all(providers.map(async (provider) => {
-        try {
-          const res = await gameApi.list(provider)
-          const games = res.games || []
-          games.forEach((g: any) => {
-            if (g.banner) bannerMap[`${provider}_${g.kode}`] = g.banner
-          })
-        } catch { }
-      }))
+        await Promise.all(providers.map(async (provider) => {
+          try {
+            const res = await gameApi.list(provider)
+            allGames[provider] = res.games || []
+          } catch { allGames[provider] = [] }
+        }))
 
-      setBanners(bannerMap)
+        const result = HOT_GAMES.map(hg => {
+          const gamesProvider = allGames[hg.provider] || []
+          const found = gamesProvider.find((g: any) => g.kode === hg.kode)
+          return { ...hg, banner: found?.banner || null }
+        })
+
+        setHotGames(result)
+      } catch {
+        setHotGames(HOT_GAMES.map(hg => ({ ...hg, banner: null })))
+      } finally {
+        setLoadingHot(false)
+      }
     }
-
-    loadBanners()
+    loadHotGames()
   }, [])
 
   useEffect(() => {
@@ -66,7 +88,7 @@ export default function Beranda() {
     return () => clearInterval(t)
   }, [])
 
-  const mainGame = (game: typeof HOT_GAMES[0]) => {
+  const mainGame = (game: any) => {
     if (!isLoggedIn) { toast.error('Silakan masuk terlebih dahulu'); navigate('/masuk'); return }
     navigate(`/game/${game.provider}?kode=${game.kode}`)
   }
@@ -92,8 +114,7 @@ export default function Beranda() {
               { label: '🔪 Hacksaw', path: '/game/HACKSAW' },
               { label: '🌶️ Habanero', path: '/game/HABANERO' },
             ].map((item, i) => (
-              <div key={item.path + i}
-                onClick={() => navigate(item.path)}
+              <div key={item.path + i} onClick={() => navigate(item.path)}
                 style={{ padding: '10px 14px', fontSize: 13, color: i === 0 ? 'var(--pink)' : 'var(--muted)', cursor: 'pointer', borderLeft: `3px solid ${i === 0 ? 'var(--pink)' : 'transparent'}`, fontWeight: 600, transition: 'all 0.2s', borderBottom: i < 9 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
                 onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.background = 'rgba(0,200,255,0.05)' }}
                 onMouseLeave={e => { e.currentTarget.style.color = i === 0 ? 'var(--pink)' : 'var(--muted)'; e.currentTarget.style.background = 'transparent' }}>
@@ -102,7 +123,6 @@ export default function Beranda() {
             ))}
           </div>
 
-          {/* Pemenang */}
           <div className="card" style={{ padding: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue)', letterSpacing: 1, marginBottom: 10 }}>🏆 PEMENANG</div>
             {pemenang.map((p, i) => (
@@ -120,10 +140,9 @@ export default function Beranda() {
           </div>
         </aside>
 
-        {/* Konten */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-          {/* Banner Slider */}
+          {/* Banner */}
           <div style={{ borderRadius: 10, overflow: 'hidden', height: 220, background: s.warna, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', transition: 'background 0.5s' }}>
             <div style={{ textAlign: 'center', padding: 20 }}>
               <div style={{ display: 'inline-block', background: 'var(--pink)', color: 'white', fontSize: 10, padding: '3px 10px', borderRadius: 3, fontWeight: 700, letterSpacing: 2, marginBottom: 12 }}>{s.tag}</div>
@@ -176,12 +195,12 @@ export default function Beranda() {
               <Link to="/game/PRAGMATIC" style={{ fontSize: 12, color: 'var(--blue)', fontWeight: 600 }}>Lihat Semua →</Link>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 10 }}>
-              {HOT_GAMES.map(game => {
-                const bannerKey = `${game.provider}_${game.kode}`
-                const bannerUrl = banners[bannerKey]
-                return (
-                  <div key={game.kode}
+            {loadingHot ? (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}><div className="spinner" /></div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 10 }}>
+                {hotGames.map((game, idx) => (
+                  <div key={idx}
                     style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', cursor: 'pointer', position: 'relative', transition: 'all 0.25s' }}
                     onMouseEnter={e => {
                       e.currentTarget.style.transform = 'translateY(-4px)'
@@ -195,37 +214,35 @@ export default function Beranda() {
                       e.currentTarget.style.boxShadow = 'none';
                       (e.currentTarget.querySelector('.ov') as HTMLElement).style.opacity = '0'
                     }}>
-
                     {game.badge && (
                       <div style={{ position: 'absolute', top: 6, left: 6, background: game.badge === 'HOT' ? 'var(--pink)' : 'var(--gold)', color: game.badge === 'HOT' ? 'white' : '#000', fontSize: 8, padding: '2px 6px', borderRadius: 3, fontWeight: 700, zIndex: 2, letterSpacing: 1 }}>
                         {game.badge}
                       </div>
                     )}
-
-                    {bannerUrl
-                      ? <img src={bannerUrl} alt={game.nama} style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', display: 'block' }} />
-                      : <div style={{ aspectRatio: '4/3', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg,#1a1a40,#2a1050)', fontSize: 32 }}>🎰</div>
+                    {game.banner
+                      ? <img src={game.banner} alt={game.nama} style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', display: 'block' }}
+                          onError={e => { const img = e.target as HTMLImageElement; img.style.display = 'none'; (img.nextSibling as HTMLElement).style.display = 'flex' }} />
+                      : null
                     }
-
+                    <div style={{ display: game.banner ? 'none' : 'flex', aspectRatio: '4/3', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg,#1a1a40,#2a1050)', fontSize: 36 }}>🎰</div>
                     <div style={{ padding: '8px 10px' }}>
-                      <div style={{ fontSize: 10, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{game.nama}</div>
+                      <div style={{ fontSize: 11, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{game.nama}</div>
                       <div style={{ fontSize: 9, color: 'var(--muted)' }}>{game.provider}</div>
                     </div>
-
                     <div className="ov" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s', backdropFilter: 'blur(2px)' }}>
                       <button className="btn btn-primary" onClick={() => mainGame(game)} style={{ padding: '8px 24px', fontSize: 13 }}>▶ MAIN</button>
                     </div>
                   </div>
-                )
-              })}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Metode Bayar */}
           <div>
             <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--blue)', letterSpacing: 1, marginBottom: 10 }}>METODE PEMBAYARAN</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {['QRIS', 'GoPay', 'OVO', 'Dana', 'ShopeePay', 'BCA', 'BRI', 'BNI', 'Mandiri', 'Pulsa'].map(m => (
+              {['QRIS','GoPay','OVO','Dana','ShopeePay','BCA','BRI','BNI','Mandiri','Pulsa'].map(m => (
                 <div key={m} style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 14px', fontSize: 12, fontWeight: 600, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--blue)', display: 'inline-block' }} />{m}
                 </div>
