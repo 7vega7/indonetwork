@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
+import { useParams, useSearchParams, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { gameApi } from '../lib/api'
 import toast from 'react-hot-toast'
@@ -40,10 +40,13 @@ export default function Game() {
   const { provider: providerParam } = useParams()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const { isLoggedIn } = useAuth()
 
-  const [kategori, setKategori] = useState('semua')
-  const [provider, setProvider] = useState(providerParam?.toUpperCase() || 'PRAGMATIC')
+  const providerAktif = providerParam?.toUpperCase() || 'PRAGMATIC'
+  const tipeAktif = PROVIDERS.find(p => p.kode === providerAktif)?.tipe || 'slot'
+  const kategoriAktif = KATEGORI.find(k => k.tipe === tipeAktif)?.kode || 'semua'
+
   const [games, setGames] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [memuat, setMemuat] = useState('')
@@ -51,20 +54,21 @@ export default function Game() {
   const [cari, setCari] = useState('')
 
   const providerFiltered = PROVIDERS.filter(p =>
-    kategori === 'semua' || p.tipe === KATEGORI.find(k => k.kode === kategori)?.tipe
+    kategoriAktif === 'semua' || p.tipe === tipeAktif
   )
 
-  useEffect(() => { muatGames(provider) }, [provider])
-
+  // Load game setiap kali provider berubah di URL
   useEffect(() => {
+    setGames([])
+    setCari('')
+    muatGames(providerAktif)
+
     const kode = searchParams.get('kode')
-    if (kode && isLoggedIn) launchGame(provider, kode)
-  }, [])
+    if (kode && isLoggedIn) launchGame(providerAktif, kode)
+  }, [location.pathname])
 
   async function muatGames(p: string) {
     setLoading(true)
-    setGames([])
-    setCari('')
     try {
       const res = await gameApi.list(p)
       setGames(res.games || [])
@@ -91,8 +95,6 @@ export default function Game() {
     !cari || g.nama.toLowerCase().includes(cari.toLowerCase())
   )
 
-  const providerInfo = PROVIDERS.find(p => p.kode === provider)
-
   if (urlGame) return (
     <div style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 999, display: 'flex', flexDirection: 'column' }}>
       <div style={{ background: 'var(--bg3)', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)' }}>
@@ -114,14 +116,13 @@ export default function Game() {
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', scrollbarWidth: 'none' }}>
         {KATEGORI.map(k => (
           <button key={k.kode} onClick={() => {
-            setKategori(k.kode)
             const first = PROVIDERS.find(p => k.tipe === null || p.tipe === k.tipe)
-            if (first) { setProvider(first.kode); navigate(`/game/${first.kode}`) }
+            if (first) navigate(`/game/${first.kode}`)
           }}
             style={{
-              background: kategori === k.kode ? 'linear-gradient(135deg,var(--pink),var(--purple))' : 'var(--bg2)',
-              border: `1px solid ${kategori === k.kode ? 'var(--pink)' : 'var(--border)'}`,
-              color: kategori === k.kode ? 'white' : 'var(--muted)',
+              background: kategoriAktif === k.kode ? 'linear-gradient(135deg,var(--pink),var(--purple))' : 'var(--bg2)',
+              border: `1px solid ${kategoriAktif === k.kode ? 'var(--pink)' : 'var(--border)'}`,
+              color: kategoriAktif === k.kode ? 'white' : 'var(--muted)',
               padding: '10px 20px', borderRadius: 8, cursor: 'pointer',
               fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap', transition: 'all 0.2s',
             }}>
@@ -137,17 +138,17 @@ export default function Game() {
           <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: 1, marginBottom: 8 }}>PROVIDER</div>
           <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
             {providerFiltered.map((p, i) => (
-              <div key={p.kode} onClick={() => { setProvider(p.kode); navigate(`/game/${p.kode}`) }}
+              <div key={p.kode} onClick={() => navigate(`/game/${p.kode}`)}
                 style={{
                   padding: '10px 14px', fontSize: 12, fontWeight: 700,
-                  color: provider === p.kode ? 'white' : 'var(--muted)',
-                  background: provider === p.kode ? 'linear-gradient(135deg,rgba(255,45,120,0.3),rgba(123,47,255,0.3))' : 'transparent',
-                  borderLeft: `3px solid ${provider === p.kode ? 'var(--pink)' : 'transparent'}`,
+                  color: providerAktif === p.kode ? 'white' : 'var(--muted)',
+                  background: providerAktif === p.kode ? 'linear-gradient(135deg,rgba(255,45,120,0.3),rgba(123,47,255,0.3))' : 'transparent',
+                  borderLeft: `3px solid ${providerAktif === p.kode ? 'var(--pink)' : 'transparent'}`,
                   cursor: 'pointer', transition: 'all 0.2s',
                   borderBottom: i < providerFiltered.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
                 }}
-                onMouseEnter={e => { if (provider !== p.kode) e.currentTarget.style.background = 'rgba(0,200,255,0.05)' }}
-                onMouseLeave={e => { if (provider !== p.kode) e.currentTarget.style.background = 'transparent' }}>
+                onMouseEnter={e => { if (providerAktif !== p.kode) e.currentTarget.style.background = 'rgba(0,200,255,0.05)' }}
+                onMouseLeave={e => { if (providerAktif !== p.kode) e.currentTarget.style.background = 'transparent' }}>
                 {p.nama}
               </div>
             ))}
@@ -159,7 +160,9 @@ export default function Game() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ width: 4, height: 18, background: 'linear-gradient(180deg,var(--pink),var(--purple))', borderRadius: 2 }} />
-              <span style={{ fontFamily: 'var(--display)', fontSize: 13, fontWeight: 700 }}>{providerInfo?.nama || provider}</span>
+              <span style={{ fontFamily: 'var(--display)', fontSize: 13, fontWeight: 700 }}>
+                {PROVIDERS.find(p => p.kode === providerAktif)?.nama || providerAktif}
+              </span>
               <span style={{ fontSize: 11, color: 'var(--muted)' }}>({filtered.length} game)</span>
             </div>
             <input className="input" type="text" placeholder="🔍 Cari game..."
@@ -167,7 +170,11 @@ export default function Game() {
               style={{ maxWidth: 220, padding: '8px 14px', fontSize: 13 }} />
           </div>
 
-          {loading && <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}><div className="spinner" /></div>}
+          {loading && (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
+              <div className="spinner" />
+            </div>
+          )}
 
           {!loading && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))', gap: 12 }}>
@@ -204,7 +211,10 @@ export default function Game() {
                   </div>
 
                   <div className="ov" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s', backdropFilter: 'blur(2px)' }}>
-                    <button className="btn btn-primary" onClick={() => launchGame(provider, game.kode)} disabled={memuat === game.kode} style={{ padding: '8px 24px', fontSize: 13 }}>
+                    <button className="btn btn-primary"
+                      onClick={() => launchGame(providerAktif, game.kode)}
+                      disabled={memuat === game.kode}
+                      style={{ padding: '8px 24px', fontSize: 13 }}>
                       {memuat === game.kode ? '⏳' : '▶ MAIN'}
                     </button>
                   </div>
