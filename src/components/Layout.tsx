@@ -2,14 +2,6 @@ import { Outlet, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import toast from 'react-hot-toast'
 
-const NAV = [
-  { label: 'Hot Games', icon: '🔥', path: '/game/PRAGMATIC' },
-  { label: 'Slot', icon: '🎰', path: '/game/PGSOFT' },
-  { label: 'Live Casino', icon: '🃏', path: '/game/EVOLUTION' },
-  { label: 'Olahraga', icon: '⚽', path: '/game/sport' },
-  { label: 'Promosi', icon: '🎁', path: '/' },
-]
-
 export default function Layout() {
   const { isLoggedIn, user, logout } = useAuth()
   const navigate = useNavigate()
@@ -32,8 +24,9 @@ export default function Layout() {
 
       {/* Header */}
       <header style={{ background: 'rgba(8,8,32,0.98)', borderBottom: '1px solid rgba(0,200,255,0.15)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)' }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '10px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '10px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
 
+          {/* Logo */}
           <Link to="/">
             <div style={{ fontFamily: 'var(--display)', fontSize: 22, fontWeight: 900, letterSpacing: 3, background: 'linear-gradient(135deg,#00c8ff,#7b2fff,#ff2d78)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', lineHeight: 1 }}>
               INDONETWORK
@@ -41,41 +34,48 @@ export default function Layout() {
             </div>
           </Link>
 
+          {/* Nav Links */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1, justifyContent: 'center' }}>
+            {[
+              { label: '🏠 Beranda', path: '/' },
+              { label: '🎰 Game', path: '/game/PRAGMATIC' },
+              { label: '💰 Deposit', path: '/deposit' },
+              { label: '📋 Riwayat', path: '/riwayat' },
+            ].map(item => (
+              <Link key={item.path} to={item.path} style={{
+                padding: '6px 14px', fontSize: 12, color: 'var(--muted)',
+                fontWeight: 600, borderRadius: 6, transition: 'all 0.2s',
+                whiteSpace: 'nowrap',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.color = 'var(--blue)'; e.currentTarget.style.background = 'rgba(0,200,255,0.08)' }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'var(--muted)'; e.currentTarget.style.background = 'transparent' }}>
+                {item.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Auth */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {isLoggedIn && user ? (
               <>
-                <div style={{ background: 'rgba(0,200,255,0.1)', border: '1px solid rgba(0,200,255,0.2)', borderRadius: 6, padding: '6px 14px', fontSize: 13, color: 'var(--blue)' }}>
+                <div style={{ background: 'rgba(0,200,255,0.1)', border: '1px solid rgba(0,200,255,0.2)', borderRadius: 6, padding: '6px 14px', fontSize: 13, color: 'var(--blue)', whiteSpace: 'nowrap' }}>
                   💰 Rp {user.saldo.toLocaleString('id-ID')}
                 </div>
-                <Link to="/profil" style={{ fontSize: 13, color: 'var(--muted)', padding: '6px 10px' }}>
+                <Link to="/profil" style={{ fontSize: 13, color: 'var(--muted)', padding: '6px 10px', whiteSpace: 'nowrap' }}>
                   👤 {user.username}
                 </Link>
-                <Link to="/deposit" className="btn btn-primary" style={{ padding: '7px 16px', fontSize: 13 }}>+ Deposit</Link>
-                <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 13 }}>Keluar</button>
+                <Link to="/deposit" className="btn btn-primary" style={{ padding: '7px 16px', fontSize: 13, whiteSpace: 'nowrap' }}>+ Deposit</Link>
+                <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}>Keluar</button>
               </>
             ) : (
               <>
-                <Link to="/masuk" className="btn btn-outline" style={{ padding: '8px 20px' }}>Masuk</Link>
-                <Link to="/daftar" className="btn btn-primary" style={{ padding: '8px 20px' }}>Daftar</Link>
+                <Link to="/masuk" className="btn btn-outline" style={{ padding: '8px 20px', whiteSpace: 'nowrap' }}>Masuk</Link>
+                <Link to="/daftar" className="btn btn-primary" style={{ padding: '8px 20px', whiteSpace: 'nowrap' }}>Daftar</Link>
               </>
             )}
           </div>
         </div>
       </header>
-
-      {/* Nav */}
-      <nav style={{ background: 'var(--bg3)', borderBottom: '1px solid rgba(255,45,120,0.15)', overflowX: 'auto' }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', padding: '0 16px' }}>
-          {NAV.map(item => (
-            <Link key={item.path} to={item.path} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '10px 16px', fontSize: 11, color: 'var(--muted)', whiteSpace: 'nowrap', fontWeight: 600, gap: 3, transition: 'color 0.2s' }}
-              onMouseEnter={e => (e.currentTarget.style.color = 'var(--blue)')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted)')}>
-              <span style={{ fontSize: 16 }}>{item.icon}</span>
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      </nav>
 
       <main style={{ flex: 1 }}>
         <Outlet />
@@ -90,7 +90,7 @@ export default function Layout() {
           </div>
           <div style={{ display: 'flex', gap: 40 }}>
             {[
-              { judul: 'Game', links: ['Slot Online', 'Live Casino', 'Olahraga'] },
+              { judul: 'Game', links: ['🎰 Slot', '🃏 Live Casino', '🚀 Crash Game', '⚽ Sportsbook'] },
               { judul: 'Bantuan', links: ['📱 WhatsApp', '💬 Live Chat', '📩 Telegram'] },
             ].map(({ judul, links }) => (
               <div key={judul}>
