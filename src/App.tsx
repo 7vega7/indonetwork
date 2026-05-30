@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
 import Layout from './components/Layout'
 import Beranda from './pages/Beranda'
@@ -15,10 +15,8 @@ function Guard({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const location = useLocation()
-
   return (
-    <Routes location={location} key={location.pathname}>
+    <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<Beranda />} />
         <Route path="masuk" element={<Login />} />
