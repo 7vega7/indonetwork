@@ -18,7 +18,7 @@ export default function Layout() {
       {/* Ticker */}
       <div style={{ background: '#0d0d2b', borderBottom: '1px solid rgba(255,45,120,0.3)', padding: '5px 0', overflow: 'hidden' }}>
         <div style={{ whiteSpace: 'nowrap', animation: 'marquee 35s linear infinite', fontSize: 11, color: 'var(--gold)', fontWeight: 600, letterSpacing: 1 }}>
-          🏆 DAFTAR SEKARANG & DAPATKAN BONUS 100%&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;🎰 DEPOSIT QRIS INSTAN&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;💎 JACKPOT HINGGA IDR 500 JUTA&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;⚡ WITHDRAW CEPAT 2 MENIT&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;🎁 FREEBET NEW MEMBER IDR 50.000&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;🏆 DAFTAR SEKARANG & DAPATKAN BONUS 100%&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;🎰 DEPOSIT QRIS INSTAN&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;💎 JACKPOT HINGGA IDR 500 JUTA
+          🏆 DAFTAR SEKARANG & DAPATKAN BONUS 100%&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;🎰 DEPOSIT QRIS INSTAN&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;💎 JACKPOT HINGGA IDR 500 JUTA&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;⚡ WITHDRAW CEPAT 2 MENIT&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;🎁 FREEBET NEW MEMBER IDR 50.000
         </div>
       </div>
 
@@ -26,7 +26,6 @@ export default function Layout() {
       <header style={{ background: 'rgba(8,8,32,0.98)', borderBottom: '1px solid rgba(0,200,255,0.15)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)' }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', padding: '10px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
 
-          {/* Logo */}
           <Link to="/">
             <div style={{ fontFamily: 'var(--display)', fontSize: 22, fontWeight: 900, letterSpacing: 3, background: 'linear-gradient(135deg,#00c8ff,#7b2fff,#ff2d78)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', lineHeight: 1 }}>
               INDONETWORK
@@ -34,25 +33,24 @@ export default function Layout() {
             </div>
           </Link>
 
-          {/* Nav Links */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, flex: 1, justifyContent: 'center' }}>
-            {[
-              { label: '🏠 Beranda', path: '/' },
-              { label: '🎰 Game', path: '/game/PRAGMATIC' },
-              { label: '💰 Deposit', path: '/deposit' },
-              { label: '📋 Riwayat', path: '/riwayat' },
-            ].map(item => (
-              <Link key={item.path} to={item.path} style={{
-                padding: '6px 14px', fontSize: 12, color: 'var(--muted)',
-                fontWeight: 600, borderRadius: 6, transition: 'all 0.2s',
-                whiteSpace: 'nowrap',
-              }}
-                onMouseEnter={e => { e.currentTarget.style.color = 'var(--blue)'; e.currentTarget.style.background = 'rgba(0,200,255,0.08)' }}
-                onMouseLeave={e => { e.currentTarget.style.color = 'var(--muted)'; e.currentTarget.style.background = 'transparent' }}>
-                {item.label}
-              </Link>
-            ))}
-          </div>
+          {/* Nav */}
+          {isLoggedIn && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1, justifyContent: 'center' }}>
+              {[
+                { label: '🏠 Beranda', path: '/' },
+                { label: '🎰 Game', path: '/game/PRAGMATIC' },
+                { label: '💰 Deposit', path: '/deposit' },
+                { label: '💸 Withdraw', path: '/withdraw' },
+                { label: '📋 Riwayat', path: '/riwayat' },
+              ].map(item => (
+                <Link key={item.path} to={item.path} style={{ padding: '6px 12px', fontSize: 12, color: 'var(--muted)', fontWeight: 600, borderRadius: 6, transition: 'all 0.2s', whiteSpace: 'nowrap' }}
+                  onMouseEnter={e => { e.currentTarget.style.color = 'var(--blue)'; e.currentTarget.style.background = 'rgba(0,200,255,0.08)' }}
+                  onMouseLeave={e => { e.currentTarget.style.color = 'var(--muted)'; e.currentTarget.style.background = 'transparent' }}>
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          )}
 
           {/* Auth */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -64,8 +62,8 @@ export default function Layout() {
                 <Link to="/profil" style={{ fontSize: 13, color: 'var(--muted)', padding: '6px 10px', whiteSpace: 'nowrap' }}>
                   👤 {user.username}
                 </Link>
-                <Link to="/deposit" className="btn btn-primary" style={{ padding: '7px 16px', fontSize: 13, whiteSpace: 'nowrap' }}>+ Deposit</Link>
-                <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap' }}>Keluar</button>
+                <Link to="/deposit" className="btn btn-primary" style={{ padding: '7px 14px', fontSize: 12, whiteSpace: 'nowrap' }}>+ Deposit</Link>
+                <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 12, whiteSpace: 'nowrap' }}>Keluar</button>
               </>
             ) : (
               <>

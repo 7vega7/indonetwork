@@ -27,19 +27,20 @@ export const gameApi = {
 
 export const userApi = {
   profil: () => get<any>('/user/profil'),
+  updateProfil: (d: any) => post<any>('/user/profil', d),
   saldo: () => get<any>('/user/saldo'),
   riwayat: (halaman = 0) => get<any>(`/user/riwayat?halaman=${halaman}`),
+  withdraw: () => get<any>('/user/withdraw'),
+  buatWithdraw: (d: any) => post<any>('/user/withdraw', d),
 }
 
 export const depositApi = {
   buat: (jumlah: number, metode: string) => post<any>('/deposit/buat', { jumlah, metode }),
 }
 
-import { formatNamaGame } from './utils'
-
-export function formatGame(game: any) {
-  return {
-    ...game,
-    nama: formatNamaGame(game.nama)
-  }
+export const adminApi = {
+  withdrawList: (status = 'pending') => get<any>(`/admin/withdraw?status=${status}`),
+  prosesWithdraw: (d: any) => post<any>('/admin/withdraw', d),
+  depositList: (status = 'pending') => get<any>(`/admin/deposit?status=${status}`),
+  konfirmasiDeposit: (deposit_id: string) => post<any>('/deposit/konfirmasi', { deposit_id }),
 }

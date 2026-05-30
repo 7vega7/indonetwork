@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Game from './pages/Game'
 import Deposit from './pages/Deposit'
+import Withdraw from './pages/Withdraw'
 import Profil from './pages/Profil'
 import Riwayat from './pages/Riwayat'
 
@@ -21,8 +22,9 @@ export default function App() {
         <Route index element={<Beranda />} />
         <Route path="masuk" element={<Login />} />
         <Route path="daftar" element={<Register />} />
-        <Route path="game/:provider?" element={<Game />} />
+        <Route path="game/:provider?" element={<Guard><Game /></Guard>} />
         <Route path="deposit" element={<Guard><Deposit /></Guard>} />
+        <Route path="withdraw" element={<Guard><Withdraw /></Guard>} />
         <Route path="profil" element={<Guard><Profil /></Guard>} />
         <Route path="riwayat" element={<Guard><Riwayat /></Guard>} />
       </Route>
