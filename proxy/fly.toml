@@ -1,0 +1,14 @@
+app = "indonetwork-proxy"
+primary_region = "sin"
+
+[build]
+  builder = "heroku/buildpacks:20"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
