@@ -88,7 +88,7 @@ export async function verifyTurnstile(token, secret, ip) {
 
 // ===== NexusGGR =====
 export async function nexus(env, body) {
-  const res = await fetch('https://api.nexusggr.com', {
+  const res = await fetch('https://indonetwork.onrender.com/nexus', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ agent_code: env.NEXUS_AGENT_CODE, agent_token: env.NEXUS_AGENT_TOKEN, ...body }),
