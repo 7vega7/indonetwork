@@ -83,7 +83,7 @@ export default function Withdraw() {
         <p style={{ color: 'var(--muted)', fontSize: 14, marginBottom: 20, lineHeight: 1.6 }}>
           Kamu harus melengkapi data rekening terlebih dahulu sebelum bisa melakukan withdraw.
         </p>
-        <button className="btn btn-primary" onClick={() => navigate('/#/profil')} style={{ width: '100%', padding: 12 }}>
+        <button className="btn btn-primary" onClick={() => navigate('/profil')} style={{ width: '100%', padding: 12 }}>
           Lengkapi Profil Sekarang
         </button>
       </div>
