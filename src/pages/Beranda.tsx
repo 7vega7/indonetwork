@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { gameApi } from '../lib/api'
+import { HOT_GAMES } from '../lib/hotgames'
 import toast from 'react-hot-toast'
 
 const SLIDES = [
@@ -9,20 +11,7 @@ const SLIDES = [
   { tag: '⚡ Deposit Kilat', judul: 'QRIS INSTAN\n30 DETIK', sub: 'Deposit via QRIS, GoPay, OVO, Dana & Bank', warna: 'linear-gradient(135deg,#1a1000,#302000,#200010)', aksi: 'DEPOSIT SEKARANG' },
 ]
 
-const GAMES = [
-  { nama: 'Gates of Olympus', provider: 'PRAGMATIC', ikon: '⚡', badge: 'HOT', kode: 'vs20olympgate' },
-  { nama: 'Sweet Bonanza 1000', provider: 'PRAGMATIC', ikon: '🍬', badge: 'HOT', kode: 'vs20swbon2500' },
-  { nama: 'Mahjong Ways 2', provider: 'PGSOFT', ikon: '🀄', badge: '', kode: 'mahjong-ways-2' },
-  { nama: 'Fortune Gems 3', provider: 'JILI', ikon: '💎', badge: 'BARU', kode: 'FortuneGems3' },
-  { nama: 'Starlight Princess', provider: 'PRAGMATIC', ikon: '⭐', badge: 'HOT', kode: 'vs20starlight' },
-  { nama: 'Money Train 4', provider: 'NLC', ikon: '🚂', badge: '', kode: 'moneytrain4' },
-  { nama: 'Treasures of Aztec', provider: 'PGSOFT', ikon: '🏛️', badge: 'HOT', kode: 'treasures-aztec' },
-  { nama: 'Le Fisherman', provider: 'HACKSAW', ikon: '🎣', badge: 'BARU', kode: 'le-fisherman' },
-  { nama: 'Hot Hot Nexus', provider: 'HABANERO', ikon: '🌶️', badge: '', kode: 'SGHotHotNexus' },
-  { nama: 'Wild Walker', provider: 'PGSOFT', ikon: '🐺', badge: '', kode: 'wild-walker' },
-]
-
-const PEMENANG = [
+const PEMENANG_AWAL = [
   { nama: 'ari***a', game: 'Gates of Olympus', jumlah: 3839000 },
   { nama: 'bud***i', game: 'Sweet Bonanza', jumlah: 2345000 },
   { nama: 'cin***a', game: 'Mahjong Ways 2', jumlah: 1780000 },
@@ -34,7 +23,30 @@ export default function Beranda() {
   const { isLoggedIn } = useAuth()
   const navigate = useNavigate()
   const [slide, setSlide] = useState(0)
-  const [pemenang, setPemenang] = useState(PEMENANG)
+  const [pemenang, setPemenang] = useState(PEMENANG_AWAL)
+  const [banners, setBanners] = useState<Record<string, string>>({})
+
+  // Load banner dari API untuk setiap provider unik
+  useEffect(() => {
+    const loadBanners = async () => {
+      const providers = [...new Set(HOT_GAMES.map(g => g.provider))]
+      const bannerMap: Record<string, string> = {}
+
+      await Promise.all(providers.map(async (provider) => {
+        try {
+          const res = await gameApi.list(provider)
+          const games = res.games || []
+          games.forEach((g: any) => {
+            if (g.banner) bannerMap[`${provider}_${g.kode}`] = g.banner
+          })
+        } catch { }
+      }))
+
+      setBanners(bannerMap)
+    }
+
+    loadBanners()
+  }, [])
 
   useEffect(() => {
     const t = setInterval(() => setSlide(s => (s + 1) % SLIDES.length), 4000)
@@ -43,8 +55,8 @@ export default function Beranda() {
 
   useEffect(() => {
     const t = setInterval(() => {
-      const names = ['ari***a','bud***i','cin***a','xyz***1','abc***2']
-      const games = ['Gates of Olympus','Sweet Bonanza','Mahjong Ways','Fortune Gems']
+      const names = ['ari***a', 'bud***i', 'cin***a', 'xyz***1', 'abc***2']
+      const games = ['Gates of Olympus', 'Sweet Bonanza', 'Mahjong Ways', 'Fortune Gems']
       setPemenang(prev => [{
         nama: names[Math.floor(Math.random() * names.length)],
         game: games[Math.floor(Math.random() * games.length)],
@@ -54,7 +66,7 @@ export default function Beranda() {
     return () => clearInterval(t)
   }, [])
 
-  const mainGame = (game: typeof GAMES[0]) => {
+  const mainGame = (game: typeof HOT_GAMES[0]) => {
     if (!isLoggedIn) { toast.error('Silakan masuk terlebih dahulu'); navigate('/masuk'); return }
     navigate(`/game/${game.provider}?kode=${game.kode}`)
   }
@@ -68,12 +80,24 @@ export default function Beranda() {
         {/* Sidebar */}
         <aside>
           <div className="card" style={{ padding: 0, overflow: 'hidden', marginBottom: 12 }}>
-            {['🔥 Hot Games','🎰 Pragmatic','⚡ JILI','🐼 PG Soft','🎯 Slot88','🔪 Hacksaw','🌙 No Limit','💎 Microgaming'].map((item, i) => (
-              <div key={item} onClick={() => navigate(`/game/${item.split(' ').slice(1).join('')}`)}
-                style={{ padding: '10px 14px', fontSize: 13, color: i === 0 ? 'var(--pink)' : 'var(--muted)', cursor: 'pointer', borderLeft: `3px solid ${i === 0 ? 'var(--pink)' : 'transparent'}`, fontWeight: 600, transition: 'all 0.2s' }}
+            {[
+              { label: '🔥 Hot Games', path: '/' },
+              { label: '🎰 Slot Games', path: '/game/PRAGMATIC' },
+              { label: '🃏 Live Casino', path: '/game/PP_LIVE_PRO' },
+              { label: '🚀 Crash Game', path: '/game/SPRIBE' },
+              { label: '⚽ Sportsbook', path: '/game/SPORTSBOOK' },
+              { label: '🎯 Pragmatic', path: '/game/PRAGMATIC' },
+              { label: '🐼 PG Soft', path: '/game/PGSOFT' },
+              { label: '⚡ Fachai', path: '/game/FACHAI' },
+              { label: '🔪 Hacksaw', path: '/game/HACKSAW' },
+              { label: '🌶️ Habanero', path: '/game/HABANERO' },
+            ].map((item, i) => (
+              <div key={item.path + i}
+                onClick={() => navigate(item.path)}
+                style={{ padding: '10px 14px', fontSize: 13, color: i === 0 ? 'var(--pink)' : 'var(--muted)', cursor: 'pointer', borderLeft: `3px solid ${i === 0 ? 'var(--pink)' : 'transparent'}`, fontWeight: 600, transition: 'all 0.2s', borderBottom: i < 9 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
                 onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.background = 'rgba(0,200,255,0.05)' }}
                 onMouseLeave={e => { e.currentTarget.style.color = i === 0 ? 'var(--pink)' : 'var(--muted)'; e.currentTarget.style.background = 'transparent' }}>
-                {item}
+                {item.label}
               </div>
             ))}
           </div>
@@ -90,7 +114,7 @@ export default function Beranda() {
                   <div style={{ fontSize: 11, fontWeight: 700 }}>{p.nama}</div>
                   <div style={{ fontSize: 10, color: 'var(--muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.game}</div>
                 </div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--gold)', whiteSpace: 'nowrap' }}>+{(p.jumlah/1000).toFixed(0)}K</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--gold)', whiteSpace: 'nowrap' }}>+{(p.jumlah / 1000).toFixed(0)}K</div>
               </div>
             ))}
           </div>
@@ -99,7 +123,7 @@ export default function Beranda() {
         {/* Konten */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-          {/* Banner */}
+          {/* Banner Slider */}
           <div style={{ borderRadius: 10, overflow: 'hidden', height: 220, background: s.warna, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', transition: 'background 0.5s' }}>
             <div style={{ textAlign: 'center', padding: 20 }}>
               <div style={{ display: 'inline-block', background: 'var(--pink)', color: 'white', fontSize: 10, padding: '3px 10px', borderRadius: 3, fontWeight: 700, letterSpacing: 2, marginBottom: 12 }}>{s.tag}</div>
@@ -119,7 +143,7 @@ export default function Beranda() {
             <span style={{ color: 'var(--blue)', flexShrink: 0 }}>📢</span>
             <div style={{ overflow: 'hidden', flex: 1 }}>
               <div style={{ whiteSpace: 'nowrap', animation: 'marquee 25s linear infinite', fontSize: 12, color: 'var(--muted)' }}>
-                SELAMAT DATANG DI INDONETWORK — Situs game online terpercaya &nbsp;•&nbsp; Pembayaran dijamin 100% &nbsp;•&nbsp; CS online 24 jam &nbsp;•&nbsp; Minimal deposit IDR 10.000 &nbsp;•&nbsp; WASPADA PENIPUAN - hanya percaya domain resmi
+                SELAMAT DATANG DI INDONETWORK — Situs game online terpercaya &nbsp;•&nbsp; Pembayaran dijamin 100% &nbsp;•&nbsp; CS online 24 jam &nbsp;•&nbsp; Minimal deposit IDR 10.000
               </div>
             </div>
           </div>
@@ -142,31 +166,58 @@ export default function Beranda() {
             ))}
           </div>
 
-          {/* Game Populer */}
+          {/* Hot Games */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'var(--display)', fontSize: 13, fontWeight: 700, letterSpacing: 2 }}>
                 <div style={{ width: 4, height: 18, background: 'linear-gradient(180deg,var(--pink),var(--purple))', borderRadius: 2 }} />
-                GAME POPULER
+                HOT GAMES
               </div>
               <Link to="/game/PRAGMATIC" style={{ fontSize: 12, color: 'var(--blue)', fontWeight: 600 }}>Lihat Semua →</Link>
             </div>
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 10 }}>
-              {GAMES.map(game => (
-                <div key={game.kode} style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', cursor: 'pointer', position: 'relative', aspectRatio: '3/4', transition: 'all 0.25s' }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.borderColor = 'var(--blue)'; (e.currentTarget.querySelector('.ov') as HTMLElement).style.opacity = '1' }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'var(--border)'; (e.currentTarget.querySelector('.ov') as HTMLElement).style.opacity = '0' }}>
-                  {game.badge && <div style={{ position: 'absolute', top: 6, left: 6, background: game.badge === 'HOT' ? 'var(--pink)' : 'var(--gold)', color: game.badge === 'HOT' ? 'white' : '#000', fontSize: 8, padding: '2px 6px', borderRadius: 3, fontWeight: 700, zIndex: 2 }}>{game.badge}</div>}
-                  <div style={{ height: '75%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg,#1a1a40,#2a1050)', fontSize: 36 }}>{game.ikon}</div>
-                  <div style={{ padding: '6px 8px' }}>
-                    <div style={{ fontSize: 10, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{game.nama}</div>
-                    <div style={{ fontSize: 9, color: 'var(--muted)' }}>{game.provider}</div>
+              {HOT_GAMES.map(game => {
+                const bannerKey = `${game.provider}_${game.kode}`
+                const bannerUrl = banners[bannerKey]
+                return (
+                  <div key={game.kode}
+                    style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', cursor: 'pointer', position: 'relative', transition: 'all 0.25s' }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.transform = 'translateY(-4px)'
+                      e.currentTarget.style.borderColor = 'var(--blue)'
+                      e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,200,255,0.2)';
+                      (e.currentTarget.querySelector('.ov') as HTMLElement).style.opacity = '1'
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.transform = 'translateY(0)'
+                      e.currentTarget.style.borderColor = 'var(--border)'
+                      e.currentTarget.style.boxShadow = 'none';
+                      (e.currentTarget.querySelector('.ov') as HTMLElement).style.opacity = '0'
+                    }}>
+
+                    {game.badge && (
+                      <div style={{ position: 'absolute', top: 6, left: 6, background: game.badge === 'HOT' ? 'var(--pink)' : 'var(--gold)', color: game.badge === 'HOT' ? 'white' : '#000', fontSize: 8, padding: '2px 6px', borderRadius: 3, fontWeight: 700, zIndex: 2, letterSpacing: 1 }}>
+                        {game.badge}
+                      </div>
+                    )}
+
+                    {bannerUrl
+                      ? <img src={bannerUrl} alt={game.nama} style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', display: 'block' }} />
+                      : <div style={{ aspectRatio: '4/3', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg,#1a1a40,#2a1050)', fontSize: 32 }}>🎰</div>
+                    }
+
+                    <div style={{ padding: '8px 10px' }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{game.nama}</div>
+                      <div style={{ fontSize: 9, color: 'var(--muted)' }}>{game.provider}</div>
+                    </div>
+
+                    <div className="ov" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s', backdropFilter: 'blur(2px)' }}>
+                      <button className="btn btn-primary" onClick={() => mainGame(game)} style={{ padding: '8px 24px', fontSize: 13 }}>▶ MAIN</button>
+                    </div>
                   </div>
-                  <div className="ov" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}>
-                    <button className="btn btn-primary" onClick={() => mainGame(game)} style={{ padding: '6px 20px', fontSize: 12 }}>MAIN</button>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
@@ -174,7 +225,7 @@ export default function Beranda() {
           <div>
             <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--blue)', letterSpacing: 1, marginBottom: 10 }}>METODE PEMBAYARAN</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-              {['QRIS','GoPay','OVO','Dana','ShopeePay','BCA','BRI','BNI','Mandiri','Pulsa'].map(m => (
+              {['QRIS', 'GoPay', 'OVO', 'Dana', 'ShopeePay', 'BCA', 'BRI', 'BNI', 'Mandiri', 'Pulsa'].map(m => (
                 <div key={m} style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 14px', fontSize: 12, fontWeight: 600, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
                   <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--blue)', display: 'inline-block' }} />{m}
                 </div>
