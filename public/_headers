@@ -1,5 +1,10 @@
 /*
-  Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate
+  Cache-Control: no-store, no-cache, must-revalidate
   Pragma: no-cache
   Expires: 0
   Surrogate-Control: no-store
+  CDN-Cache-Control: no-store
+
+/index.html
+  Cache-Control: no-store, no-cache, must-revalidate
+  Pragma: no-cache
