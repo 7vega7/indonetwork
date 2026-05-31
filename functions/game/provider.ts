@@ -1,16 +1,13 @@
 // @ts-nocheck
-import { ok, err, nexus } from '../_utils';
+import { ok, err, getSupabase } from '../_utils';
 
 export async function onRequestGet({ request, env }) {
-  const data = await nexus(env, { method: 'provider_list' });
-  if (!data || data.status !== 1) return err('Gagal mengambil provider');
+  const sb = getSupabase(env);
+  const { data } = await sb
+    .from('providers')
+    .select('*')
+    .eq('aktif', true)
+    .order('urutan', { ascending: true });
 
-  return ok({
-    providers: (data.providers || []).map(p => ({
-      kode: p.code,
-      nama: p.name,
-      tipe: p.type,
-      aktif: p.status === 1
-    }))
-  });
+  return ok({ providers: data || [] });
 }
