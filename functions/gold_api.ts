@@ -5,14 +5,27 @@ export async function onRequestPost({ request, env }) {
   let body;
   try { body = await request.json(); } catch { return json({ status: 0, msg: 'INVALID_JSON' }, 400); }
 
+  // Log semua request untuk debug
+  console.log('GOLD_API REQUEST:', JSON.stringify(body));
+
   if (body.agent_code !== env.NEXUS_AGENT_CODE) {
+    console.log('INVALID AGENT:', body.agent_code);
     return json({ status: 0, msg: 'INVALID_AGENT' }, 401);
   }
 
   const { method, user_code } = body;
+  console.log('METHOD:', method, 'USER_CODE:', user_code);
+
   const sb = getSupabase(env);
 
-  const { data: user } = await sb.from('users').select('id, username, balance, is_active').eq('username', user_code.toLowerCase()).maybeSingle();
+  const { data: user } = await sb
+    .from('users')
+    .select('id, username, balance, is_active')
+    .eq('username', user_code.toLowerCase())
+    .maybeSingle();
+
+  console.log('USER FOUND:', user ? `${user.username} balance=${user.balance}` : 'NOT FOUND');
+
   if (!user) return json({ status: 0, msg: 'USER_NOT_FOUND' });
   if (!user.is_active) return json({ status: 0, msg: 'USER_INACTIVE' });
 
@@ -28,9 +41,9 @@ export async function onRequestPost({ request, env }) {
     if (exist) return json({ status: 1, user_balance: user.balance });
 
     let balanceChange = txn_type === 'debit' ? -bet_money : txn_type === 'credit' ? win_money : win_money - bet_money;
-    let jenis = balanceChange >= 0 ? 'win' : 'bet';
-
+    const jenis = balanceChange >= 0 ? 'win' : 'bet';
     const newBalance = user.balance + balanceChange;
+
     if (newBalance < 0) return json({ status: 0, msg: 'INSUFFICIENT_USER_FUNDS' });
 
     await sb.from('users').update({ balance: newBalance }).eq('id', user.id);
