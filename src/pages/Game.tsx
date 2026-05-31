@@ -92,6 +92,9 @@ export default function Game() {
     } finally { setMemuat('') }
   }
 
+  useEffect(() => {
+  }, [urlGame])
+
   const filtered = games.filter(g =>
     !cari || g.nama.toLowerCase().includes(cari.toLowerCase())
   )
