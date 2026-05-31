@@ -26,7 +26,7 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 export default function Withdraw() {
-  const { user } = useAuth()
+  const { user, syncSaldo } = useAuth()
   const navigate = useNavigate()
   const [profil, setProfil] = useState<any>(null)
   const [riwayat, setRiwayat] = useState<any[]>([])
@@ -36,6 +36,7 @@ export default function Withdraw() {
   const [loadingRiwayat, setLoadingRiwayat] = useState(false)
 
   useEffect(() => {
+    syncSaldo()
     userApi.profil().then(res => setProfil(res.pengguna))
     muatRiwayat()
   }, [])
