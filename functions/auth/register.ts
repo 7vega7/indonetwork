@@ -47,23 +47,24 @@ export async function onRequestPost({ request, env }) {
 
   if (error || !user) return err('Gagal membuat akun, coba lagi');
 
-  // Daftarkan user ke NexusGGR Transfer API
+  // Daftarkan ke NexusGGR Transfer API
   try {
-    const nexusRes = await nexus(env, {
-      method: 'user_create',
-      user_code: user.username,
-    });
-    console.log('NexusGGR user_create:', nexusRes?.msg || 'unknown');
-  } catch (e) {
+    await nexus(env, { method: 'user_create', user_code: user.username });
+  } catch(e) {
     console.error('NexusGGR user_create error:', e);
-    // Tidak gagalkan register meski NexusGGR error
   }
 
-  const token = await signJWT({ sub: user.id, username: user.username, role: user.role }, env.JWT_SECRET);
+  const token = await signJWT(
+    { sub: user.id, username: user.username, role: user.role },
+    env.JWT_SECRET
+  );
 
   return ok({
     pesan: 'Akun berhasil dibuat',
     token,
-    user: { id: user.id, username: user.username, email: user.email, saldo: user.balance, role: user.role, kode_referral: user.referral_code },
+    user: {
+      id: user.id, username: user.username, email: user.email,
+      saldo: user.balance, role: user.role, kode_referral: user.referral_code
+    },
   });
 }

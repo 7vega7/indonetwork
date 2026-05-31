@@ -18,11 +18,16 @@ export async function onRequestPost({ request, env }) {
         method: 'user_create',
         user_code: user.username,
       });
-      results.push({ username: user.username, status: res.status, msg: res.msg });
+      results.push({
+        username: user.username,
+        status: res.status,
+        msg: res.msg,
+      });
     } catch(e) {
       results.push({ username: user.username, status: 0, msg: 'error' });
     }
   }
 
-  return ok({ pesan: `${results.length} user diproses`, results });
+  const berhasil = results.filter(r => r.status === 1 || r.msg === 'DUPLICATED_USER').length;
+  return ok({ pesan: `${berhasil}/${results.length} user tersinkronisasi`, results });
 }

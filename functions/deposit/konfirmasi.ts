@@ -21,12 +21,29 @@ export async function onRequestPost({ request, env }) {
   if (!deposit) return err('Deposit tidak ditemukan', 404);
   if (deposit.status !== 'pending') return err('Deposit sudah diproses');
 
-  // Kirim saldo ke NexusGGR via user_deposit
+  const agentSign = deposit_id.replace(/-/g, '_');
+
+  // Cek apakah sudah pernah diproses (transfer_status)
+  const statusCheck = await nexus(env, {
+    method: 'transfer_status',
+    user_code: deposit.users.username,
+    agent_sign: agentSign,
+  });
+
+  if (statusCheck?.status === 1 && statusCheck?.type === 'user_deposit') {
+    // Sudah pernah deposit, update Supabase saja
+    const saldoBaru = statusCheck.user_balance;
+    await sb.from('users').update({ balance: saldoBaru }).eq('id', deposit.user_id);
+    await sb.from('deposits').update({ status: 'success', updated_at: new Date().toISOString() }).eq('id', deposit_id);
+    return ok({ pesan: 'Deposit sudah dikonfirmasi sebelumnya', saldo_baru: saldoBaru });
+  }
+
+  // Kirim ke NexusGGR
   const nexusRes = await nexus(env, {
     method: 'user_deposit',
     user_code: deposit.users.username,
     amount: deposit.amount,
-    agent_sign: deposit_id,
+    agent_sign: agentSign,
   });
 
   if (!nexusRes || nexusRes.status !== 1) {
@@ -35,12 +52,8 @@ export async function onRequestPost({ request, env }) {
 
   const saldoBaru = nexusRes.user_balance;
 
-  // Update Supabase
   await sb.from('users').update({ balance: saldoBaru }).eq('id', deposit.user_id);
-  await sb.from('deposits').update({
-    status: 'success',
-    updated_at: new Date().toISOString(),
-  }).eq('id', deposit_id);
+  await sb.from('deposits').update({ status: 'success', updated_at: new Date().toISOString() }).eq('id', deposit_id);
   await sb.from('transactions').insert({
     user_id: deposit.user_id,
     type: 'deposit',
@@ -52,8 +65,5 @@ export async function onRequestPost({ request, env }) {
     status: 'success',
   });
 
-  return ok({
-    pesan: 'Deposit berhasil dikonfirmasi',
-    saldo_baru: saldoBaru,
-  });
+  return ok({ pesan: 'Deposit berhasil dikonfirmasi', saldo_baru: saldoBaru });
 }

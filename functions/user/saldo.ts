@@ -14,7 +14,6 @@ export async function onRequestGet({ request, env }) {
 
   if (!user) return err('User tidak ditemukan', 404);
 
-  // Ambil saldo real dari NexusGGR
   try {
     const nexusRes = await nexus(env, {
       method: 'money_info',
@@ -23,15 +22,12 @@ export async function onRequestGet({ request, env }) {
 
     if (nexusRes?.status === 1 && nexusRes?.user) {
       const saldoNexus = nexusRes.user.balance;
-      // Sync ke Supabase
       if (saldoNexus !== user.balance) {
         await sb.from('users').update({ balance: saldoNexus }).eq('id', auth.sub);
       }
       return ok({ saldo: saldoNexus });
     }
-  } catch(e) {
-    console.error('money_info error:', e);
-  }
+  } catch(e) { console.error('money_info error:', e); }
 
   return ok({ saldo: user.balance });
 }

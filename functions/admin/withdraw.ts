@@ -40,20 +40,35 @@ export async function onRequestPost({ request, env }) {
   if (!wd) return err('Withdrawal tidak ditemukan');
   if (wd.status !== 'pending') return err('Withdrawal sudah diproses');
 
+  const agentSign = `wd_${withdrawal_id.replace(/-/g, '_')}`;
+
   if (aksi === 'sukses') {
-    // Tarik saldo dari NexusGGR
-    const nexusRes = await nexus(env, {
-      method: 'user_withdraw',
+    // Cek transfer_status dulu
+    const statusCheck = await nexus(env, {
+      method: 'transfer_status',
       user_code: wd.users.username,
-      amount: wd.amount,
-      agent_sign: withdrawal_id,
+      agent_sign: agentSign,
     });
 
-    if (!nexusRes || nexusRes.status !== 1) {
-      return err(`Gagal withdraw dari NexusGGR: ${nexusRes?.msg || 'Unknown error'}`);
+    let saldoBaru = 0;
+
+    if (statusCheck?.status === 1 && statusCheck?.type === 'user_withdraw') {
+      saldoBaru = statusCheck.user_balance;
+    } else {
+      // Tarik saldo dari NexusGGR
+      const nexusRes = await nexus(env, {
+        method: 'user_withdraw',
+        user_code: wd.users.username,
+        amount: wd.amount,
+        agent_sign: agentSign,
+      });
+
+      if (!nexusRes || nexusRes.status !== 1) {
+        return err(`Gagal withdraw dari NexusGGR: ${nexusRes?.msg || 'Unknown error'}`);
+      }
+      saldoBaru = nexusRes.user_balance;
     }
 
-    const saldoBaru = nexusRes.user_balance;
     await sb.from('users').update({ balance: saldoBaru }).eq('id', wd.user_id);
     await sb.from('transactions')
       .update({ status: 'success' })
@@ -62,16 +77,19 @@ export async function onRequestPost({ request, env }) {
       .eq('status', 'pending');
 
   } else {
-    // Ditolak - kembalikan saldo ke NexusGGR dengan user_deposit
-    const saldoKembali = wd.users.balance + wd.amount;
+    // Ditolak - kembalikan saldo ke NexusGGR
+    const refundSign = `refund_${withdrawal_id.replace(/-/g, '_')}`;
     const nexusRes = await nexus(env, {
       method: 'user_deposit',
       user_code: wd.users.username,
       amount: wd.amount,
-      agent_sign: `refund_${withdrawal_id}`,
+      agent_sign: refundSign,
     });
 
-    const saldoBaru = nexusRes?.status === 1 ? nexusRes.user_balance : saldoKembali;
+    const saldoBaru = nexusRes?.status === 1
+      ? nexusRes.user_balance
+      : wd.users.balance + wd.amount;
+
     await sb.from('users').update({ balance: saldoBaru }).eq('id', wd.user_id);
     await sb.from('transactions').insert({
       user_id: wd.user_id, type: 'deposit', amount: wd.amount,
