@@ -1,4 +1,5 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import toast from 'react-hot-toast'
 
@@ -11,9 +12,15 @@ const NAV_ITEMS = [
 ]
 
 export default function Layout() {
-  const { isLoggedIn, user, logout } = useAuth()
+  const { isLoggedIn, user, logout, syncSaldo } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+
+  useEffect(() => {
+    syncSaldo() // sync langsung saat mount
+    const interval = setInterval(() => syncSaldo(), 15000) // setiap 15 detik
+    return () => clearInterval(interval)
+  }, [isLoggedIn])
 
   const handleLogout = () => {
     logout()
