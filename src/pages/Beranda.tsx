@@ -11,19 +11,6 @@ const SLIDES = [
   { tag: '⚡ Deposit Kilat', judul: 'QRIS INSTAN\n30 DETIK', sub: 'Deposit via QRIS, GoPay, OVO, Dana & Bank', warna: 'linear-gradient(135deg,#1a1000,#302000,#200010)', aksi: 'DEPOSIT SEKARANG' },
 ]
 
-const NOMINAL_ACAK = [
-  50000, 63000, 87000, 98000, 125000, 150000, 187000,
-  200000, 230000, 275000, 320000, 400000, 487000, 498000,
-  550000, 720000, 850000, 1250000, 1800000, 2340000,
-  3500000, 5400000, 12000000, 25000000,
-]
-
-const NAMA_ACAK = [
-  'bud***to','sri***ti','agu***an','fit***ri','eko***di',
-  'rin***ah','har***to','yul***na','and***an','pur***ti',
-  'dew***ri','sun***to','ind***ti','wah***di','rat***ah',
-]
-
 const HOT_GAMES = [
   { nama: 'Gates of Olympus 1000', provider: 'PRAGMATIC', kode: 'vs20olympgate', badge: 'HOT' },
   { nama: 'Sweet Bonanza 1000', provider: 'PRAGMATIC', kode: 'vs20fruitswx', badge: 'HOT' },
@@ -88,18 +75,6 @@ export default function Beranda() {
     loadHotGames()
   }, [])
 
-  useEffect(() => {
-    const t = setInterval(() => {
-      const isWd = Math.random() < 0.2
-      setPemenang(prev => [{
-        nama: NAMA_ACAK[Math.floor(Math.random() * NAMA_ACAK.length)],
-        game: isWd ? '-' : GAME_ACAK[Math.floor(Math.random() * GAME_ACAK.length)],
-        jumlah: NOMINAL_ACAK[Math.floor(Math.random() * NOMINAL_ACAK.length)],
-        type: isWd ? 'withdraw' : 'menang',
-      }, ...prev.slice(0, 8)])
-    }, 2500)
-    return () => clearInterval(t)
-  }, [])
 
   const mainGame = (game: any) => {
     if (!isLoggedIn) { toast.error('Silakan masuk terlebih dahulu'); navigate('/masuk'); return }
