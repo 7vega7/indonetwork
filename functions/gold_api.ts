@@ -5,7 +5,7 @@ export async function onRequestPost({ request, env }) {
   let body;
   try { body = await request.json(); } catch { return json({ status: 0, msg: 'INVALID_JSON' }, 400); }
 
-  if (body.agent_code !== env.NEXUS_AGENT_CODE || body.agent_secret !== env.NEXUS_AGENT_TOKEN) {
+  if (body.agent_code !== env.NEXUS_AGENT_CODE) {
     return json({ status: 0, msg: 'INVALID_AGENT' }, 401);
   }
 
