@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ok, err, getAuth, getSupabase } from '../_utils';
+import { ok, err, getAuth, getSupabase, nexus } from '../_utils';
 
 export async function onRequestGet({ request, env }) {
   const auth = await getAuth(request, env);
@@ -33,30 +33,44 @@ export async function onRequestPost({ request, env }) {
   const sb = getSupabase(env);
   const { data: wd } = await sb
     .from('withdrawals')
-    .select('*, users(balance)')
+    .select('*, users(balance, username)')
     .eq('id', withdrawal_id)
     .single();
 
   if (!wd) return err('Withdrawal tidak ditemukan');
   if (wd.status !== 'pending') return err('Withdrawal sudah diproses');
 
-  if (aksi === 'ditolak') {
-    // Kembalikan saldo
+  if (aksi === 'sukses') {
+    // Tarik saldo dari NexusGGR
+    const nexusRes = await nexus(env, {
+      method: 'user_withdraw',
+      user_code: wd.users.username,
+      amount: wd.amount,
+      agent_sign: withdrawal_id,
+    });
+
+    if (!nexusRes || nexusRes.status !== 1) {
+      return err(`Gagal withdraw dari NexusGGR: ${nexusRes?.msg || 'Unknown error'}`);
+    }
+
+    // Update saldo Supabase
+    const saldoBaru = Math.max(0, wd.users.balance - wd.amount);
+    await sb.from('users').update({ balance: saldoBaru }).eq('id', wd.user_id);
+    await sb.from('transactions').update({ status: 'success' })
+      .eq('user_id', wd.user_id).eq('type', 'withdraw').eq('status', 'pending');
+
+  } else {
+    // Ditolak - kembalikan saldo
     const saldoBaru = wd.users.balance + wd.amount;
     await sb.from('users').update({ balance: saldoBaru }).eq('id', wd.user_id);
     await sb.from('transactions').insert({
       user_id: wd.user_id, type: 'deposit', amount: wd.amount,
       balance_before: wd.users.balance, balance_after: saldoBaru,
-      description: `Withdraw ditolak - saldo dikembalikan${catatan_admin ? ': ' + catatan_admin : ''}`,
+      description: `Withdraw ditolak - saldo dikembalikan`,
       status: 'success',
     });
-  } else {
-    // Update transaksi withdraw jadi success
-    await sb.from('transactions')
-      .update({ status: 'success' })
-      .eq('user_id', wd.user_id)
-      .eq('type', 'withdraw')
-      .eq('status', 'pending');
+    await sb.from('transactions').update({ status: 'failed' })
+      .eq('user_id', wd.user_id).eq('type', 'withdraw').eq('status', 'pending');
   }
 
   await sb.from('withdrawals').update({
