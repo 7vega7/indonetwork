@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { gameApi } from '../lib/api'
-import Aktivitas from '../components/Aktivitas'
+// import Aktivitas from '../components/Aktivitas'
 import toast from 'react-hot-toast'
 
 const SLIDES = [
@@ -198,7 +198,7 @@ export default function Beranda() {
           <div style={{ width: 3, height: 14, background: 'linear-gradient(180deg,var(--blue),var(--purple))', borderRadius: 2 }} />
           <span style={{ fontFamily: 'var(--display)', fontSize: 11, fontWeight: 700 }}>AKTIVITAS TERBARU</span>
         </div>
-        <Aktivitas mobile />
+        { /* Aktivitas */ }
       </div>
 
     </div>
@@ -235,7 +235,7 @@ export default function Beranda() {
 
           <div className="card" style={{ padding: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue)', letterSpacing: 1, marginBottom: 10 }}>🏆 AKTIVITAS</div>
-            <Aktivitas />
+            { /* Aktivitas */ }
           </div>
         </aside>
 
