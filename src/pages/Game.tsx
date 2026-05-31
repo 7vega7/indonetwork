@@ -100,7 +100,7 @@ export default function Game() {
     <div style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 999, display: 'flex', flexDirection: 'column' }}>
       <div style={{ background: 'var(--bg3)', padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border)' }}>
         <span style={{ fontFamily: 'var(--display)', fontSize: 12, fontWeight: 700, color: 'var(--blue)' }}>INDONETWORK</span>
-        <button onClick={() => setUrlGame('')} style={{ background: 'var(--pink)', border: 'none', color: 'white', padding: '5px 14px', borderRadius: 4, cursor: 'pointer', fontWeight: 600, fontSize: 12 }}>✕ Keluar</button>
+        <button onClick={() => { setUrlGame(''); syncSaldo(); }} style={{ background: 'var(--pink)', border: 'none', color: 'white', padding: '5px 14px', borderRadius: 4, cursor: 'pointer', fontWeight: 600, fontSize: 12 }}>✕ Keluar</button>
       </div>
       <iframe src={urlGame} style={{ flex: 1, border: 'none', width: '100%' }} allowFullScreen title="Game" />
     </div>
