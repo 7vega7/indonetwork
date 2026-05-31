@@ -1,12 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
-import { aktivitasApi } from '../lib/api'
 import { randomAktivitas, AKTIVITAS_AWAL } from '../lib/aktivitas'
 
 interface Item {
   nama: string
   jumlah: number
   type: string
-  isReal?: boolean
 }
 
 const TYPE_COLOR: Record<string, string> = {
@@ -19,11 +17,6 @@ const TYPE_LABEL: Record<string, string> = {
   withdraw: '💸 Withdraw',
 }
 
-const TYPE_ICON: Record<string, string> = {
-  deposit: '💰',
-  withdraw: '💸',
-}
-
 const TYPE_BG: Record<string, string> = {
   deposit: 'linear-gradient(135deg,#00c8ff,#7b2fff)',
   withdraw: 'linear-gradient(135deg,#ff9500,#ff2d78)',
@@ -33,20 +26,30 @@ export default function Aktivitas({ mobile = false }: { mobile?: boolean }) {
   const [items, setItems] = useState<Item[]>(AKTIVITAS_AWAL)
   const realDataRef = useRef<Item[]>([])
 
+  // Ambil data real dari API
   useEffect(() => {
-    aktivitasApi.get().then(res => {
-      if (res.aktivitas && res.aktivitas.length > 0) {
-        realDataRef.current = res.aktivitas
-          .filter((a: any) => ['deposit', 'withdraw'].includes(a.type))
-          .map((a: any) => ({ ...a, isReal: true }))
-      }
-    }).catch(() => {})
+    const token = localStorage.getItem('token')
+    if (!token) return
+    fetch('/aktivitas', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(r => r.json())
+      .then(res => {
+        if (res?.aktivitas?.length > 0) {
+          realDataRef.current = res.aktivitas.filter(
+            (a: any) => ['deposit', 'withdraw'].includes(a.type)
+          )
+        }
+      })
+      .catch(() => {})
   }, [])
 
+  // Update aktivitas secara berkala
   useEffect(() => {
-    const interval = () => {
+    let timeout: ReturnType<typeof setTimeout>
+    const schedule = () => {
       const delay = 2000 + Math.random() * 2000
-      return setTimeout(() => {
+      timeout = setTimeout(() => {
         setItems(prev => {
           let newItem: Item
           if (realDataRef.current.length > 0 && Math.random() < 0.3) {
@@ -57,11 +60,11 @@ export default function Aktivitas({ mobile = false }: { mobile?: boolean }) {
           }
           return [newItem, ...prev.slice(0, mobile ? 7 : 9)]
         })
-        t = interval()
+        schedule()
       }, delay)
     }
-    let t = interval()
-    return () => clearTimeout(t)
+    schedule()
+    return () => clearTimeout(timeout)
   }, [mobile])
 
   const shown = items.slice(0, mobile ? 8 : 10)
@@ -73,21 +76,12 @@ export default function Aktivitas({ mobile = false }: { mobile?: boolean }) {
           display: 'flex', alignItems: 'center', gap: 10,
           padding: '9px 12px',
           borderBottom: i < shown.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-          animation: i === 0 ? 'fadeIn 0.4s ease' : 'none',
-          background: transparent,
         }}>
-          <div style={{
-            width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
-            background: TYPE_BG[p.type] || TYPE_BG.deposit,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
-          }}>
-            {TYPE_ICON[p.type] || '💰'}
+          <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, background: TYPE_BG[p.type] || TYPE_BG.deposit, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>
+            {p.type === 'withdraw' ? '💸' : '💰'}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 12, fontWeight: 700 }}>
-              {p.nama}
-              
-            </div>
+            <div style={{ fontSize: 12, fontWeight: 700 }}>{p.nama}</div>
             <div style={{ fontSize: 10, color: TYPE_COLOR[p.type] || 'var(--muted)' }}>
               {TYPE_LABEL[p.type] || '-'}
             </div>
@@ -102,7 +96,6 @@ export default function Aktivitas({ mobile = false }: { mobile?: boolean }) {
     </div>
   )
 
-  // Sidebar desktop
   return (
     <div>
       {shown.map((p, i) => (
@@ -110,20 +103,12 @@ export default function Aktivitas({ mobile = false }: { mobile?: boolean }) {
           display: 'flex', alignItems: 'center', gap: 8,
           padding: '5px 0',
           borderBottom: i < shown.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-          animation: i === 0 ? 'fadeIn 0.4s ease' : 'none',
         }}>
-          <div style={{
-            width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
-            background: TYPE_BG[p.type] || TYPE_BG.deposit,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11,
-          }}>
-            {TYPE_ICON[p.type] || '💰'}
+          <div style={{ width: 24, height: 24, borderRadius: '50%', flexShrink: 0, background: TYPE_BG[p.type] || TYPE_BG.deposit, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11 }}>
+            {p.type === 'withdraw' ? '💸' : '💰'}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 10, fontWeight: 700 }}>
-              {p.nama}
-              
-            </div>
+            <div style={{ fontSize: 10, fontWeight: 700 }}>{p.nama}</div>
             <div style={{ fontSize: 9, color: TYPE_COLOR[p.type] }}>
               {TYPE_LABEL[p.type]}
             </div>

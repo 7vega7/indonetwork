@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { gameApi } from '../lib/api'
-// import Aktivitas from '../components/Aktivitas'
+import Aktivitas from '../components/Aktivitas'
 import toast from 'react-hot-toast'
 
 const SLIDES = [
