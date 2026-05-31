@@ -28,7 +28,6 @@ export async function onRequestPost({ request, env }) {
 
   const sb = getSupabase(env);
 
-  // Cek profil lengkap
   const { data: user } = await sb
     .from('users')
     .select('balance, profil_lengkap, username')
@@ -47,16 +46,12 @@ export async function onRequestPost({ request, env }) {
     });
     if (moneyInfo?.status === 1 && moneyInfo?.user) {
       saldoAktual = moneyInfo.user.balance;
-      // Sync ke Supabase
-      await sb.from('users').update({ balance: saldoAktual }).eq('id', auth.sub);
     }
-  } catch(e) { console.error('money_info error:', e); }
+  } catch(e) {}
 
   if (saldoAktual < jumlah) return err('Saldo tidak mencukupi');
 
-  // Catat withdrawal request - status pending
-  // Saldo TIDAK di-freeze karena ada di NexusGGR
-  // Admin yang akan panggil user_withdraw ke NexusGGR
+  // Buat withdrawal record dulu untuk dapat ID
   const { data: wd } = await sb.from('withdrawals').insert({
     user_id: auth.sub,
     amount: jumlah,
@@ -66,19 +61,42 @@ export async function onRequestPost({ request, env }) {
     status: 'pending',
   }).select().single();
 
+  if (!wd) return err('Gagal membuat permintaan withdraw');
+
+  // Langsung tarik saldo dari NexusGGR
+  const agentSign = `wd_${wd.id.replace(/-/g, '_')}`;
+  const nexusRes = await nexus(env, {
+    method: 'user_withdraw',
+    user_code: user.username,
+    amount: jumlah,
+    agent_sign: agentSign,
+  });
+
+  if (!nexusRes || nexusRes.status !== 1) {
+    // Gagal tarik dari NexusGGR - hapus withdrawal record
+    await sb.from('withdrawals').delete().eq('id', wd.id);
+    return err(`Gagal memproses withdraw: ${nexusRes?.msg || 'Unknown error'}`);
+  }
+
+  const saldoSetelah = nexusRes.user_balance;
+
+  // Update saldo Supabase
+  await sb.from('users').update({ balance: saldoSetelah }).eq('id', auth.sub);
+
   // Catat transaksi pending
   await sb.from('transactions').insert({
     user_id: auth.sub,
     type: 'withdraw',
     amount: jumlah,
     balance_before: saldoAktual,
-    balance_after: saldoAktual, // Belum berubah, tunggu admin konfirmasi
+    balance_after: saldoSetelah,
     description: `Withdraw ke ${bank} - ${no_rekening}`,
     status: 'pending',
   });
 
   return ok({
-    pesan: 'Permintaan withdraw berhasil dikirim, menunggu konfirmasi admin',
+    pesan: 'Permintaan withdraw berhasil, menunggu konfirmasi admin',
     withdrawal: wd,
+    saldo_sekarang: saldoSetelah,
   });
 }
