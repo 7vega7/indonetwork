@@ -44,3 +44,7 @@ export const adminApi = {
   depositList: (status = 'pending') => get<any>(`/admin/deposit?status=${status}`),
   konfirmasiDeposit: (deposit_id: string) => post<any>('/deposit/konfirmasi', { deposit_id }),
 }
+
+export const aktivitasApi = {
+  get: () => get<any>('/aktivitas'),
+}
