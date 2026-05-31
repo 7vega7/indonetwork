@@ -10,6 +10,7 @@ import Withdraw from './pages/Withdraw'
 import Profil from './pages/Profil'
 import Riwayat from './pages/Riwayat'
 import Admin from './pages/Admin'
+import Promosi from './pages/Promosi'
 
 function Guard({ children }: { children: React.ReactNode }) {
   const { isLoggedIn } = useAuth()
@@ -35,6 +36,8 @@ export default function App() {
         <Route path="withdraw" element={<Guard><Withdraw /></Guard>} />
         <Route path="profil" element={<Guard><Profil /></Guard>} />
         <Route path="riwayat" element={<Guard><Riwayat /></Guard>} />
+        <Route path="promosi" element={<Promosi />} />
+        <Route path="promosi/:slug" element={<Promosi />} />
         <Route path="admin" element={<AdminGuard><Admin /></AdminGuard>} />
       </Route>
     </Routes>

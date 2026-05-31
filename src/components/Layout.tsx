@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { label: 'Deposit', icon: '💰', path: '/deposit' },
   { label: 'Withdraw', icon: '💸', path: '/withdraw' },
   { label: 'Profil', icon: '👤', path: '/profil' },
+  { label: 'Promosi', icon: '🎁', path: '/promosi' },
 ]
 
 export default function Layout() {
