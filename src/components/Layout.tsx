@@ -145,3 +145,4 @@ export default function Layout() {
     </div>
   )
 }
+// Auto sync saldo setiap 30 detik

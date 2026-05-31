@@ -41,7 +41,7 @@ export default function Game() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const location = useLocation()
-  const { isLoggedIn } = useAuth()
+  const { isLoggedIn, syncSaldo } = useAuth()
 
   const providerAktif = providerParam?.toUpperCase() || 'PRAGMATIC'
   const tipeAktif = PROVIDERS.find(p => p.kode === providerAktif)?.tipe || 'slot'

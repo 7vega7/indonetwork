@@ -15,9 +15,9 @@ interface AuthStore {
   login: (token: string, user: User) => void
   logout: () => void
   updateSaldo: (saldo: number) => void
+  syncSaldo: () => Promise<void>
 }
 
-// Restore user dari localStorage saat app load
 function restoreUser(): User | null {
   try {
     const stored = localStorage.getItem('user')
@@ -26,7 +26,7 @@ function restoreUser(): User | null {
   return null
 }
 
-export const useAuth = create<AuthStore>((set) => ({
+export const useAuth = create<AuthStore>((set, get) => ({
   user: restoreUser(),
   token: localStorage.getItem('token'),
   isLoggedIn: !!localStorage.getItem('token') && !!localStorage.getItem('user'),
@@ -46,4 +46,19 @@ export const useAuth = create<AuthStore>((set) => ({
     localStorage.setItem('user', JSON.stringify(updatedUser))
     return { user: updatedUser }
   }),
+  syncSaldo: async () => {
+    const { token, user } = get()
+    if (!token || !user) return
+    try {
+      const res = await fetch('/user/saldo', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const data = await res.json()
+      if (data.status === 1 && data.saldo !== undefined) {
+        const updatedUser = { ...user, saldo: data.saldo }
+        localStorage.setItem('user', JSON.stringify(updatedUser))
+        set({ user: updatedUser })
+      }
+    } catch(e) { console.error('syncSaldo error:', e) }
+  },
 }))
