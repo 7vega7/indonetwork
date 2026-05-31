@@ -74,7 +74,7 @@ export default function Aktivitas({ mobile = false }: { mobile?: boolean }) {
           padding: '9px 12px',
           borderBottom: i < shown.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
           animation: i === 0 ? 'fadeIn 0.4s ease' : 'none',
-          background: p.isReal ? 'rgba(0,200,255,0.04)' : 'transparent',
+          background: transparent,
         }}>
           <div style={{
             width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
@@ -86,7 +86,7 @@ export default function Aktivitas({ mobile = false }: { mobile?: boolean }) {
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 12, fontWeight: 700 }}>
               {p.nama}
-              {p.isReal && <span style={{ fontSize: 9, color: 'var(--blue)', marginLeft: 4 }}>✓</span>}
+              
             </div>
             <div style={{ fontSize: 10, color: TYPE_COLOR[p.type] || 'var(--muted)' }}>
               {TYPE_LABEL[p.type] || '-'}
@@ -122,7 +122,7 @@ export default function Aktivitas({ mobile = false }: { mobile?: boolean }) {
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 10, fontWeight: 700 }}>
               {p.nama}
-              {p.isReal && <span style={{ fontSize: 8, color: 'var(--blue)', marginLeft: 3 }}>✓</span>}
+              
             </div>
             <div style={{ fontSize: 9, color: TYPE_COLOR[p.type] }}>
               {TYPE_LABEL[p.type]}
