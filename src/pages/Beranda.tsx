@@ -42,6 +42,7 @@ export default function Beranda() {
   const navigate = useNavigate()
   const [slide, setSlide] = useState(0)
   const [hotGames, setHotGames] = useState<any[]>([])
+  const [banners, setBanners] = useState<any[]>([])
   const [loadingHot, setLoadingHot] = useState(true)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
@@ -52,6 +53,12 @@ export default function Beranda() {
   }, [])
 
   useEffect(() => {
+    // Load banners dari database
+    fetch('/banners')
+      .then(r => r.json())
+      .then(res => { if (res.banners?.length > 0) setBanners(res.banners) })
+      .catch(() => {})
+
     const loadHotGames = async () => {
       setLoadingHot(true)
       try {

@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
 import { adminApi } from '../lib/api'
 import toast from 'react-hot-toast'
+import ImageUpload from '../components/ImageUpload'
 
 const TAB = [
   { kode: 'dashboard', label: '📊 Dashboard' },
@@ -466,7 +467,7 @@ export default function Admin() {
             )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div><label style={labelStyle}>Nama</label><input style={inputStyle} value={modalProvider.nama} onChange={e => setModalProvider((p: any) => ({ ...p, nama: e.target.value }))} /></div>
-              <div><label style={labelStyle}>URL Logo</label><input style={inputStyle} placeholder="https://..." value={modalProvider.logo_url || ''} onChange={e => setModalProvider((p: any) => ({ ...p, logo_url: e.target.value }))} /></div>
+              <ImageUpload value={modalProvider.logo_url || ''} onChange={url => setModalProvider((p: any) => ({ ...p, logo_url: url }))} folder="provider" label="Logo Provider" />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <div><label style={labelStyle}>Tipe</label>
                   <select style={{ ...inputStyle, cursor: 'pointer' }} value={modalProvider.tipe} onChange={e => setModalProvider((p: any) => ({ ...p, tipe: e.target.value }))}>
@@ -512,7 +513,7 @@ export default function Admin() {
               </div>
               <div><label style={labelStyle}>Judul (Enter untuk baris baru)</label><textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 60 }} placeholder={'BONUS DEPOSIT\n100%'} value={modalBanner.judul} onChange={e => setModalBanner((b: any) => ({ ...b, judul: e.target.value }))} /></div>
               <div><label style={labelStyle}>Sub Judul</label><input style={inputStyle} placeholder="Deskripsi singkat promo" value={modalBanner.subjudul} onChange={e => setModalBanner((b: any) => ({ ...b, subjudul: e.target.value }))} /></div>
-              <div><label style={labelStyle}>URL Gambar Background (opsional)</label><input style={inputStyle} placeholder="https://... (kosongkan untuk pakai warna)" value={modalBanner.gambar_url} onChange={e => setModalBanner((b: any) => ({ ...b, gambar_url: e.target.value }))} /></div>
+              <ImageUpload value={modalBanner.gambar_url} onChange={url => setModalBanner((b: any) => ({ ...b, gambar_url: url }))} folder="banner" label="Gambar Background (opsional)" />
               <div><label style={labelStyle}>Warna Background (CSS gradient)</label><input style={inputStyle} placeholder="linear-gradient(135deg,#0a0a30,#1a0040)" value={modalBanner.warna_bg} onChange={e => setModalBanner((b: any) => ({ ...b, warna_bg: e.target.value }))} /></div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <div><label style={labelStyle}>Teks Tombol</label><input style={inputStyle} placeholder="KLAIM SEKARANG" value={modalBanner.teks_tombol} onChange={e => setModalBanner((b: any) => ({ ...b, teks_tombol: e.target.value }))} /></div>
@@ -548,7 +549,7 @@ export default function Admin() {
               <div><label style={labelStyle}>Judul</label><input style={inputStyle} placeholder="Bonus Deposit 100%" value={modalPromosi.judul} onChange={e => setModalPromosi((p: any) => ({ ...p, judul: e.target.value }))} /></div>
               <div><label style={labelStyle}>Slug URL (auto-generate jika kosong)</label><input style={inputStyle} placeholder="bonus-deposit-100" value={modalPromosi.slug} onChange={e => setModalPromosi((p: any) => ({ ...p, slug: e.target.value }))} /></div>
               <div><label style={labelStyle}>Deskripsi Singkat</label><input style={inputStyle} placeholder="Deskripsi untuk kartu promosi" value={modalPromosi.deskripsi} onChange={e => setModalPromosi((p: any) => ({ ...p, deskripsi: e.target.value }))} /></div>
-              <div><label style={labelStyle}>URL Gambar</label><input style={inputStyle} placeholder="https://..." value={modalPromosi.gambar_url} onChange={e => setModalPromosi((p: any) => ({ ...p, gambar_url: e.target.value }))} /></div>
+              <ImageUpload value={modalPromosi.gambar_url} onChange={url => setModalPromosi((p: any) => ({ ...p, gambar_url: url }))} folder="promosi" label="Gambar Promosi" />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 <div><label style={labelStyle}>Jenis</label>
                   <select style={{ ...inputStyle, cursor: 'pointer' }} value={modalPromosi.jenis} onChange={e => setModalPromosi((p: any) => ({ ...p, jenis: e.target.value }))}>
