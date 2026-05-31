@@ -12,7 +12,7 @@ export async function onRequestPost({ request, env }) {
   const { method, user_code } = body;
   const sb = getSupabase(env);
 
-  const { data: user } = await sb.from('users').select('id, username, balance, is_active').eq('username', user_code).maybeSingle();
+  const { data: user } = await sb.from('users').select('id, username, balance, is_active').eq('username', user_code.toLowerCase()).maybeSingle();
   if (!user) return json({ status: 0, msg: 'USER_NOT_FOUND' });
   if (!user.is_active) return json({ status: 0, msg: 'USER_INACTIVE' });
 
