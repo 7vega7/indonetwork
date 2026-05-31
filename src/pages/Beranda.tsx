@@ -92,22 +92,32 @@ export default function Beranda() {
     navigate(`/game/${game.provider}?kode=${game.kode}`)
   }
 
-  const s = SLIDES[slide]
+  const slideData = (banners.length > 0 ? banners : SLIDES).map((b: any) => ({
+    tag: b.tag || '',
+    judul: b.judul || '',
+    sub: b.subjudul || b.sub || '',
+    warna: b.warna_bg || b.warna || 'linear-gradient(135deg,#0a0a30,#1a0040,#300020)',
+    gambar: b.gambar_url || '',
+    aksi: b.teks_tombol || b.aksi || 'KLAIM SEKARANG',
+    link: b.link_tombol || '/deposit',
+  }))
+  const s = slideData[slide % slideData.length]
 
   // ===== MOBILE =====
   if (isMobile) return (
     <div style={{ paddingBottom: 70 }}>
 
       {/* Banner */}
-      <div style={{ position: 'relative', height: 160, background: s.warna, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', transition: 'background 0.5s' }}>
-        <div style={{ textAlign: 'center', padding: '0 16px' }}>
+      <div style={{ position: 'relative', height: 160, background: s.gambar ? undefined : s.warna, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', transition: 'background 0.5s' }}>
+        {s.gambar && <img src={s.gambar} alt={s.judul} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />}
+        <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '0 16px', background: s.gambar ? 'rgba(0,0,0,0.45)' : 'none', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ display: 'inline-block', background: 'var(--pink)', color: 'white', fontSize: 9, padding: '2px 8px', borderRadius: 3, fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>{s.tag}</div>
           <div style={{ fontFamily: 'var(--display)', fontSize: 22, fontWeight: 900, lineHeight: 1.1, background: 'linear-gradient(135deg,#00c8ff,#ffd700)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: 6, whiteSpace: 'pre-line' }}>{s.judul}</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>{s.sub}</div>
-          <button className="btn btn-primary" style={{ padding: '6px 16px', fontSize: 12 }} onClick={() => navigate(isLoggedIn ? '/deposit' : '/daftar')}>{s.aksi}</button>
+          <button className="btn btn-primary" style={{ padding: '6px 16px', fontSize: 12 }} onClick={() => navigate(isLoggedIn ? (s.link || '/deposit') : '/daftar')}>{s.aksi}</button>
         </div>
         <div style={{ position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 5 }}>
-          {SLIDES.map((_, i) => (
+          {slideData.map((_, i) => (
             <div key={i} onClick={() => setSlide(i)} style={{ width: i === slide ? 16 : 6, height: 6, borderRadius: 3, background: i === slide ? 'var(--pink)' : 'rgba(255,255,255,0.4)', cursor: 'pointer', transition: 'all 0.3s' }} />
           ))}
         </div>
@@ -250,12 +260,12 @@ export default function Beranda() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
           {/* Banner */}
-          <div style={{ borderRadius: 10, overflow: 'hidden', height: 220, background: s.warna, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', transition: 'background 0.5s' }}>
+          <div style={{ borderRadius: 10, overflow: 'hidden', height: 220, background: s.gambar ? undefined : s.warna, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', transition: 'background 0.5s' }}>
             <div style={{ textAlign: 'center', padding: 20 }}>
               <div style={{ display: 'inline-block', background: 'var(--pink)', color: 'white', fontSize: 10, padding: '3px 10px', borderRadius: 3, fontWeight: 700, letterSpacing: 2, marginBottom: 12 }}>{s.tag}</div>
               <div style={{ fontFamily: 'var(--display)', fontSize: 28, fontWeight: 900, lineHeight: 1.1, background: 'linear-gradient(135deg,#00c8ff,#ffd700)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: 10, whiteSpace: 'pre-line' }}>{s.judul}</div>
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginBottom: 16 }}>{s.sub}</div>
-              <button className="btn btn-primary" onClick={() => navigate(isLoggedIn ? '/deposit' : '/daftar')}>{s.aksi}</button>
+              <button className="btn btn-primary" onClick={() => navigate(isLoggedIn ? (s.link || '/deposit') : '/daftar')}>{s.aksi}</button>
             </div>
             <div style={{ position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6 }}>
               {SLIDES.map((_, i) => (
