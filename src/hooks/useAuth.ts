@@ -17,17 +17,33 @@ interface AuthStore {
   updateSaldo: (saldo: number) => void
 }
 
+// Restore user dari localStorage saat app load
+function restoreUser(): User | null {
+  try {
+    const stored = localStorage.getItem('user')
+    if (stored) return JSON.parse(stored)
+  } catch { }
+  return null
+}
+
 export const useAuth = create<AuthStore>((set) => ({
-  user: null,
+  user: restoreUser(),
   token: localStorage.getItem('token'),
-  isLoggedIn: !!localStorage.getItem('token'),
+  isLoggedIn: !!localStorage.getItem('token') && !!localStorage.getItem('user'),
   login: (token, user) => {
     localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(user))
     set({ token, user, isLoggedIn: true })
   },
   logout: () => {
     localStorage.removeItem('token')
+    localStorage.removeItem('user')
     set({ token: null, user: null, isLoggedIn: false })
   },
-  updateSaldo: (saldo) => set((s) => ({ user: s.user ? { ...s.user, saldo } : null })),
+  updateSaldo: (saldo) => set((s) => {
+    if (!s.user) return {}
+    const updatedUser = { ...s.user, saldo }
+    localStorage.setItem('user', JSON.stringify(updatedUser))
+    return { user: updatedUser }
+  }),
 }))
