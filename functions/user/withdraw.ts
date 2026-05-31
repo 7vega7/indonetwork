@@ -1,11 +1,15 @@
 // @ts-nocheck
-import { ok, err, getAuth, getSupabase } from '../_utils';
+import { ok, err, getAuth, getSupabase, nexus } from '../_utils';
 
 export async function onRequestGet({ request, env }) {
   const auth = await getAuth(request, env);
   if (!auth) return err('Tidak terautentikasi', 401);
   const sb = getSupabase(env);
-  const { data } = await sb.from('withdrawals').select('*').eq('user_id', auth.sub).order('created_at', { ascending: false });
+  const { data } = await sb
+    .from('withdrawals')
+    .select('*')
+    .eq('user_id', auth.sub)
+    .order('created_at', { ascending: false });
   return ok({ withdrawals: data || [] });
 }
 
@@ -24,28 +28,57 @@ export async function onRequestPost({ request, env }) {
 
   const sb = getSupabase(env);
 
-  // Cek saldo
-  const { data: user } = await sb.from('users').select('balance, profil_lengkap').eq('id', auth.sub).single();
+  // Cek profil lengkap
+  const { data: user } = await sb
+    .from('users')
+    .select('balance, profil_lengkap, username')
+    .eq('id', auth.sub)
+    .single();
+
   if (!user) return err('Pengguna tidak ditemukan', 404);
   if (!user.profil_lengkap) return err('Lengkapi profil terlebih dahulu');
-  if (user.balance < jumlah) return err('Saldo tidak mencukupi');
 
-  // Freeze saldo
-  const { error } = await sb.from('users').update({ balance: user.balance - jumlah }).eq('id', auth.sub);
-  if (error) return err('Gagal memproses withdraw');
+  // Ambil saldo real dari NexusGGR
+  let saldoAktual = user.balance;
+  try {
+    const moneyInfo = await nexus(env, {
+      method: 'money_info',
+      user_code: user.username,
+    });
+    if (moneyInfo?.status === 1 && moneyInfo?.user) {
+      saldoAktual = moneyInfo.user.balance;
+      // Sync ke Supabase
+      await sb.from('users').update({ balance: saldoAktual }).eq('id', auth.sub);
+    }
+  } catch(e) { console.error('money_info error:', e); }
 
-  // Catat transaksi
+  if (saldoAktual < jumlah) return err('Saldo tidak mencukupi');
+
+  // Catat withdrawal request - status pending
+  // Saldo TIDAK di-freeze karena ada di NexusGGR
+  // Admin yang akan panggil user_withdraw ke NexusGGR
+  const { data: wd } = await sb.from('withdrawals').insert({
+    user_id: auth.sub,
+    amount: jumlah,
+    bank,
+    no_rekening,
+    atas_nama,
+    status: 'pending',
+  }).select().single();
+
+  // Catat transaksi pending
   await sb.from('transactions').insert({
-    user_id: auth.sub, type: 'withdraw', amount: jumlah,
-    balance_before: user.balance, balance_after: user.balance - jumlah,
+    user_id: auth.sub,
+    type: 'withdraw',
+    amount: jumlah,
+    balance_before: saldoAktual,
+    balance_after: saldoAktual, // Belum berubah, tunggu admin konfirmasi
     description: `Withdraw ke ${bank} - ${no_rekening}`,
     status: 'pending',
   });
 
-  // Buat withdrawal request
-  const { data: wd } = await sb.from('withdrawals').insert({
-    user_id: auth.sub, amount: jumlah, bank, no_rekening, atas_nama, status: 'pending',
-  }).select().single();
-
-  return ok({ pesan: 'Permintaan withdraw berhasil dikirim', withdrawal: wd });
+  return ok({
+    pesan: 'Permintaan withdraw berhasil dikirim, menunggu konfirmasi admin',
+    withdrawal: wd,
+  });
 }
