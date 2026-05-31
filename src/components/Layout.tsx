@@ -17,9 +17,16 @@ export default function Layout() {
   const location = useLocation()
 
   useEffect(() => {
-    syncSaldo() // sync langsung saat mount
-    const interval = setInterval(() => syncSaldo(), 15000) // setiap 15 detik
-    return () => clearInterval(interval)
+    syncSaldo()
+    // Sync saat user kembali ke tab
+    const onVisible = () => { if (document.visibilityState === 'visible') syncSaldo() }
+    document.addEventListener('visibilitychange', onVisible)
+    // Sync setiap 60 detik
+    const interval = setInterval(() => syncSaldo(), 60000)
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
   }, [isLoggedIn])
 
   const handleLogout = () => {
