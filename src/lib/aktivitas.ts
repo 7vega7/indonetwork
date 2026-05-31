@@ -10,38 +10,40 @@ export const NOMINAL_POOL = [
   7500000, 10000000, 15000000, 20000000, 25000000,
 ]
 
-export const NAMA_POOL = [
-  'budi','sari','agus','fitri','eko','rina','harto',
-  'yuli','andi','putra','dewi','sunu','indah','wahyu',
-  'ratna','dian','reza','maya','bayu','laras','farhan',
-  'nadia','rizky','tania','gilang','putri','kevin','sinta',
-  'arif','cindy','doni','elsa','fajar','gita','hendra',
-  'irma','joko','kiki','lina','mira','nanda','oka',
-  'pandu','rini','stevn','tika','umar','vina',
-  'wawan','yoga','zara','bram','cici','dedi','evi',
-]
+const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'
+const ANGKA = '0123456789'
+const ALPHANUMERIC = ALPHABET + ANGKA
 
 export const TYPE_POOL = [
-  'deposit','deposit','deposit','deposit', // 50%
-  'withdraw','withdraw','withdraw',        // 37.5%
-  'deposit','withdraw',                   // mixed
+  'deposit','deposit','deposit','deposit',
+  'withdraw','withdraw','withdraw',
+  'deposit','withdraw',
 ]
 
+// Generate nama fiktif: 1 huruf acak + 2-5 bintang + 1 huruf/angka acak
+export function randomNamaFiktif(): string {
+  const depan = ALPHABET[Math.floor(Math.random() * ALPHABET.length)]
+  const jumlahBintang = 2 + Math.floor(Math.random() * 4) // 2-5 bintang
+  const bintang = '*'.repeat(jumlahBintang)
+  const belakang = ALPHANUMERIC[Math.floor(Math.random() * ALPHANUMERIC.length)]
+  return `${depan}${bintang}${belakang}`
+}
+
+// Sensor nama user asli: huruf depan + bintang + huruf/angka belakang
 export function sensorNama(nama: string): string {
-  if (!nama || nama.length === 0) return 'a***a'
-  if (nama.length === 1) return nama + '***'
-  if (nama.length === 2) return nama[0] + '***' + nama[1]
+  if (!nama || nama.length === 0) return randomNamaFiktif()
+  if (nama.length === 1) return nama[0] + '***' + ALPHANUMERIC[Math.floor(Math.random() * ALPHANUMERIC.length)]
   const depan = nama[0]
   const belakang = nama[nama.length - 1]
-  const bintang = '*'.repeat(Math.min(Math.max(nama.length - 2, 2), 5))
+  const jumlahBintang = Math.min(Math.max(nama.length - 2, 2), 5)
+  const bintang = '*'.repeat(jumlahBintang)
   return `${depan}${bintang}${belakang}`
 }
 
 export function randomAktivitas() {
   const type = TYPE_POOL[Math.floor(Math.random() * TYPE_POOL.length)]
-  const nama = NAMA_POOL[Math.floor(Math.random() * NAMA_POOL.length)]
   const jumlah = NOMINAL_POOL[Math.floor(Math.random() * NOMINAL_POOL.length)]
-  return { nama: sensorNama(nama), jumlah, type }
+  return { nama: randomNamaFiktif(), jumlah, type }
 }
 
 export const AKTIVITAS_AWAL = Array.from({ length: 10 }, randomAktivitas)
