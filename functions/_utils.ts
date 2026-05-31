@@ -1,18 +1,30 @@
 // @ts-nocheck
 import { createClient } from '@supabase/supabase-js';
 
-// ===== Response helpers =====
+const PROXY_URL = 'https://indonetwork.onrender.com/nexus';
+
 export const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
-
 export const ok = (data) => json({ status: 1, ...data });
 export const err = (message, status = 400) => json({ status: 0, error: message }, status);
-
-// ===== Supabase =====
 export const getSupabase = (env) =>
   createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY, { auth: { persistSession: false } });
 
-// ===== JWT =====
+// NexusGGR via Render proxy
+export async function nexus(env, body) {
+  const res = await fetch(PROXY_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      agent_code: env.NEXUS_AGENT_CODE,
+      agent_token: env.NEXUS_AGENT_TOKEN,
+      ...body,
+    }),
+  });
+  return res.json();
+}
+
+// JWT
 const b64url = (data) => {
   const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
   return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
@@ -54,7 +66,6 @@ export async function getAuth(request, env) {
   return verifyJWT(auth.slice(7), env.JWT_SECRET);
 }
 
-// ===== Password =====
 export async function hashPassword(password) {
   const enc = new TextEncoder();
   const salt = crypto.getRandomValues(new Uint8Array(16));
@@ -75,23 +86,12 @@ export async function verifyPassword(password, stored) {
   return hash === hashHex;
 }
 
-// ===== Turnstile =====
-export async function verifyTurnstile(token, secret, ip) {
+export async function verifyTurnstile(token, secretKey, ip) {
   const form = new FormData();
-  form.append('secret', secret);
+  form.append('secret', secretKey);
   form.append('response', token);
   if (ip) form.append('remoteip', ip);
   const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', { method: 'POST', body: form });
   const data = await res.json();
   return data.success === true;
-}
-
-// ===== NexusGGR =====
-export async function nexus(env, body) {
-  const res = await fetch('https://indonetwork.onrender.com/nexus', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ agent_code: env.NEXUS_AGENT_CODE, agent_token: env.NEXUS_AGENT_TOKEN, ...body }),
-  });
-  return res.json();
 }

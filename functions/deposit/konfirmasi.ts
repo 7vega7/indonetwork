@@ -21,7 +21,7 @@ export async function onRequestPost({ request, env }) {
   if (!deposit) return err('Deposit tidak ditemukan', 404);
   if (deposit.status !== 'pending') return err('Deposit sudah diproses');
 
-  // Kirim saldo ke NexusGGR
+  // Kirim saldo ke NexusGGR via user_deposit
   const nexusRes = await nexus(env, {
     method: 'user_deposit',
     user_code: deposit.users.username,
@@ -33,32 +33,27 @@ export async function onRequestPost({ request, env }) {
     return err(`Gagal deposit ke NexusGGR: ${nexusRes?.msg || 'Unknown error'}`);
   }
 
-  // Update status deposit
+  const saldoBaru = nexusRes.user_balance;
+
+  // Update Supabase
+  await sb.from('users').update({ balance: saldoBaru }).eq('id', deposit.user_id);
   await sb.from('deposits').update({
     status: 'success',
     updated_at: new Date().toISOString(),
   }).eq('id', deposit_id);
-
-  // Catat transaksi di Supabase
   await sb.from('transactions').insert({
     user_id: deposit.user_id,
     type: 'deposit',
     amount: deposit.amount,
     balance_before: deposit.users.balance,
-    balance_after: deposit.users.balance + deposit.amount,
+    balance_after: saldoBaru,
     description: `Deposit via ${deposit.method} dikonfirmasi`,
     reference: deposit.reference,
     status: 'success',
   });
 
-  // Update saldo di Supabase juga (untuk tampilan)
-  await sb.from('users').update({
-    balance: deposit.users.balance + deposit.amount,
-  }).eq('id', deposit.user_id);
-
   return ok({
     pesan: 'Deposit berhasil dikonfirmasi',
-    nexus_agent_balance: nexusRes.agent_balance,
-    nexus_user_balance: nexusRes.user_balance,
+    saldo_baru: saldoBaru,
   });
 }
