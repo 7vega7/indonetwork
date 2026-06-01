@@ -35,7 +35,7 @@ export const userApi = {
 }
 
 export const depositApi = {
-  buat: (jumlah: number, metode: string) => post<any>('/deposit/buat', { jumlah, metode }),
+  buat: (jumlah: number, metode: string, nama?: string, email?: string, telepon?: string) => post<any>('/deposit/buat', { jumlah, metode, nama, email, telepon }),
 }
 
 export const adminApi = {
