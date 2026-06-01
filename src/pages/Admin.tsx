@@ -88,7 +88,14 @@ export default function Admin() {
   }, [tab, statusFilter])
 
   const muatStats = async () => { const d = await apiCall('/admin/stats'); setStats(d.stats) }
-  const muatDeposit = async () => { setLoading(true); const d = await apiCall(`/admin/deposit?status=${statusFilter}`); setDeposits(d.deposits || []); setLoading(false) }
+  const muatDeposit = async () => {
+    // Auto expire deposit kadaluarsa dulu
+    await fetch('/cron').catch(() => {})
+    setLoading(true)
+    const d = await apiCall(`/admin/deposit?status=${statusFilter}`)
+    setDeposits(d.deposits || [])
+    setLoading(false)
+  }
   const muatWithdraw = async () => { setLoading(true); const d = await apiCall(`/admin/withdraw?status=${statusFilter}`); setWithdrawals(d.withdrawals || []); setLoading(false) }
   const muatUsers = async () => { setLoading(true); const d = await apiCall(`/admin/users?cari=${cari}`); setUsers(d.users || []); setLoading(false) }
   const muatProviders = async () => { setLoading(true); const d = await apiCall('/admin/providers'); setProviders(d.providers || []); setLoading(false) }
