@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ok, err, getAuth, getSupabase } from '../_utils';
+import { ok, err, getAuth, getSupabase, nexus } from '../_utils';
 
 export async function onRequestGet({ request, env }) {
   const auth = await getAuth(request, env);
@@ -34,6 +34,12 @@ export async function onRequestPost({ request, env }) {
   if (!aksi || !user_id) return err('aksi dan user_id diperlukan');
 
   const sb = getSupabase(env);
+  const { data: user } = await sb
+    .from('users')
+    .select('username, balance')
+    .eq('id', user_id)
+    .single();
+  if (!user) return err('User tidak ditemukan');
 
   if (aksi === 'nonaktifkan') {
     await sb.from('users').update({ is_active: false }).eq('id', user_id);
@@ -47,9 +53,22 @@ export async function onRequestPost({ request, env }) {
 
   if (aksi === 'tambah_saldo') {
     if (!jumlah || jumlah <= 0) return err('Jumlah tidak valid');
-    const { data: user } = await sb.from('users').select('balance').eq('id', user_id).single();
-    if (!user) return err('User tidak ditemukan');
-    const saldoBaru = user.balance + jumlah;
+
+    // Kirim ke NexusGGR
+    const agentSign = `admin_add_${user_id.replace(/-/g, '_')}_${Date.now()}`
+    const nexusRes = await nexus(env, {
+      method: 'user_deposit',
+      user_code: user.username,
+      amount: jumlah,
+      agent_sign: agentSign,
+    })
+
+    if (!nexusRes || nexusRes.status !== 1) {
+      return err(`Gagal tambah saldo NexusGGR: ${nexusRes?.msg || 'Unknown error'}`)
+    }
+
+    const saldoBaru = nexusRes.user_balance
+
     await sb.from('users').update({ balance: saldoBaru }).eq('id', user_id);
     await sb.from('transactions').insert({
       user_id, type: 'bonus', amount: jumlah,
@@ -57,15 +76,28 @@ export async function onRequestPost({ request, env }) {
       description: keterangan || 'Penambahan saldo oleh admin',
       status: 'success',
     });
-    return ok({ pesan: 'Saldo berhasil ditambahkan', saldo_baru: saldoBaru });
+
+    return ok({ pesan: 'Saldo berhasil ditambahkan via NexusGGR', saldo_baru: saldoBaru });
   }
 
   if (aksi === 'kurang_saldo') {
     if (!jumlah || jumlah <= 0) return err('Jumlah tidak valid');
-    const { data: user } = await sb.from('users').select('balance').eq('id', user_id).single();
-    if (!user) return err('User tidak ditemukan');
-    if (user.balance < jumlah) return err('Saldo user tidak mencukupi');
-    const saldoBaru = user.balance - jumlah;
+
+    // Tarik dari NexusGGR
+    const agentSign = `admin_sub_${user_id.replace(/-/g, '_')}_${Date.now()}`
+    const nexusRes = await nexus(env, {
+      method: 'user_withdraw',
+      user_code: user.username,
+      amount: jumlah,
+      agent_sign: agentSign,
+    })
+
+    if (!nexusRes || nexusRes.status !== 1) {
+      return err(`Gagal kurang saldo NexusGGR: ${nexusRes?.msg || 'Unknown error'}`)
+    }
+
+    const saldoBaru = nexusRes.user_balance
+
     await sb.from('users').update({ balance: saldoBaru }).eq('id', user_id);
     await sb.from('transactions').insert({
       user_id, type: 'withdraw', amount: jumlah,
@@ -73,7 +105,8 @@ export async function onRequestPost({ request, env }) {
       description: keterangan || 'Pengurangan saldo oleh admin',
       status: 'success',
     });
-    return ok({ pesan: 'Saldo berhasil dikurangi', saldo_baru: saldoBaru });
+
+    return ok({ pesan: 'Saldo berhasil dikurangi via NexusGGR', saldo_baru: saldoBaru });
   }
 
   return err('Aksi tidak valid');

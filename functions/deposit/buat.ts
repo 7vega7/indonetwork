@@ -16,21 +16,24 @@ export async function onRequestPost({ request, env }) {
 
   const sb = getSupabase(env);
 
-  // Cek apakah ada deposit pending
+  // Cek deposit pending - blokir jika masih ada
   const { data: pending } = await sb
     .from('deposits')
-    .select('id, created_at, expired_at')
+    .select('id, created_at, expired_at, amount, method')
     .eq('user_id', auth.sub)
     .eq('status', 'pending')
     .maybeSingle();
 
   if (pending) {
-    // Cek apakah sudah expired
-    const expiredAt = pending.expired_at ? new Date(pending.expired_at) : new Date(new Date(pending.created_at).getTime() + 60 * 60 * 1000)
+    const expiredAt = pending.expired_at
+      ? new Date(pending.expired_at)
+      : new Date(new Date(pending.created_at).getTime() + 60 * 60 * 1000)
+
     if (new Date() < expiredAt) {
       const sisaMenit = Math.ceil((expiredAt.getTime() - Date.now()) / 60000)
-      return err(`Kamu masih memiliki deposit pending. Selesaikan atau tunggu ${sisaMenit} menit hingga expired.`)
+      return err(`Masih ada deposit pending Rp ${pending.amount.toLocaleString('id')} via ${pending.method}. Tunggu ${sisaMenit} menit atau hubungi admin.`)
     }
+
     // Auto expire deposit lama
     await sb.from('deposits').update({
       status: 'failed',
@@ -41,23 +44,24 @@ export async function onRequestPost({ request, env }) {
 
   const settings = await getSettings(env)
   const jayapayAktif = settings['jayapay_aktif'] === 'true'
-  const orderNum = `DEP-${auth.username.toUpperCase()}-${Date.now()}`
-  const expiredAt = new Date(Date.now() + parseInt(settings['deposit_timeout_menit'] || '60') * 60 * 1000)
+  const orderNum = `DEP${auth.username.toUpperCase()}${Date.now()}`
+  const timeoutMenit = parseInt(settings['deposit_timeout_menit'] || '60')
+  const expiredAt = new Date(Date.now() + timeoutMenit * 60 * 1000)
 
   if (jayapayAktif && settings['jayapay_merchant_code'] && settings['jayapay_private_key']) {
-    // Mode otomatis - pakai JayaPay
     try {
       const result = await createOrder({
         merchantCode: settings['jayapay_merchant_code'],
         privateKey: settings['jayapay_private_key'],
-        mode: settings['jayapay_mode'] || 'test',
+        mode: settings['jayapay_mode'] || 'live',
         orderNum,
         amount: jumlah,
         method: metode,
         name: nama || auth.username,
         email: email || `${auth.username}@indonetwork.com`,
         phone: telepon || '081234567890',
-        notifyUrl: settings['jayapay_notify_url'] || `${new URL(request.url).origin}/deposit/callback`,
+        notifyUrl: settings['jayapay_notify_url'] || 'https://indonetwork.pages.dev/deposit/callback',
+        productDetail: 'Deposit INDONETWORK',
       })
 
       if (result.platRespCode !== 'SUCCESS') {
@@ -90,7 +94,7 @@ export async function onRequestPost({ request, env }) {
     }
   }
 
-  // Mode manual - tanpa JayaPay
+  // Mode manual
   const { data: deposit } = await sb.from('deposits').insert({
     user_id: auth.sub,
     amount: jumlah,

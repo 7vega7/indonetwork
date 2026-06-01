@@ -29,25 +29,23 @@ export async function onRequestPost({ request, env }) {
   const valid = await verifyCallback(body, settings['jayapay_public_key'])
   if (!valid) {
     console.log('Invalid signature')
-    return new Response('SUCCESS', { status: 200 }) // tetap SUCCESS agar tidak retry
+    return new Response('SUCCESS', { status: 200 })
   }
 
   const status = parseCallbackStatus(body)
-  console.log('Status:', status)
-
   if (status !== 'paid') {
+    console.log('Status bukan paid:', status)
     return new Response('SUCCESS', { status: 200 })
   }
 
   const { orderNum, platOrderNum } = body
   const sb = getSupabase(env)
 
-  // Cari deposit
+  // Cari deposit - termasuk yang sudah success (idempoten)
   const { data: deposit } = await sb
     .from('deposits')
     .select('*, users(username, balance)')
     .eq('reference', orderNum)
-    .eq('status', 'pending')
     .maybeSingle()
 
   if (!deposit) {
@@ -55,29 +53,45 @@ export async function onRequestPost({ request, env }) {
     return new Response('SUCCESS', { status: 200 })
   }
 
-  // Kirim saldo ke NexusGGR
-  try {
-    const nexusRes = await nexus(env, {
-      method: 'user_deposit',
-      user_code: deposit.users.username,
-      amount: deposit.amount,
-      agent_sign: deposit.id.replace(/-/g, '_'),
-    })
+  // Jika sudah success, skip
+  if (deposit.status === 'success') {
+    console.log('Deposit sudah diproses:', orderNum)
+    return new Response('SUCCESS', { status: 200 })
+  }
 
-    if (!nexusRes || nexusRes.status !== 1) {
+  // Kirim saldo ke NexusGGR
+  const agentSign = deposit.id.replace(/-/g, '_')
+  const nexusRes = await nexus(env, {
+    method: 'user_deposit',
+    user_code: deposit.users.username,
+    amount: deposit.amount,
+    agent_sign: agentSign,
+  })
+
+  if (!nexusRes || nexusRes.status !== 1) {
+    // Cek apakah sudah pernah deposit (duplicate)
+    if (nexusRes?.msg?.includes('Duplicated') || nexusRes?.msg?.includes('duplicate')) {
+      console.log('Duplicate NexusGGR deposit, lanjut update status')
+    } else {
       console.log('Gagal deposit NexusGGR:', nexusRes?.msg)
       return new Response('SUCCESS', { status: 200 })
     }
+  }
 
-    const saldoBaru = nexusRes.user_balance
+  const saldoBaru = nexusRes?.user_balance || (deposit.users.balance + deposit.amount)
 
-    await sb.from('users').update({ balance: saldoBaru }).eq('id', deposit.user_id)
-    await sb.from('deposits').update({
+  // Update semua sekaligus
+  await Promise.all([
+    // Update saldo Supabase
+    sb.from('users').update({ balance: saldoBaru }).eq('id', deposit.user_id),
+    // Update status deposit
+    sb.from('deposits').update({
       status: 'success',
-      plat_order_num: platOrderNum,
+      plat_order_num: platOrderNum || null,
       updated_at: new Date().toISOString(),
-    }).eq('id', deposit.id)
-    await sb.from('transactions').insert({
+    }).eq('id', deposit.id),
+    // Catat transaksi
+    sb.from('transactions').insert({
       user_id: deposit.user_id,
       type: 'deposit',
       amount: deposit.amount,
@@ -86,13 +100,10 @@ export async function onRequestPost({ request, env }) {
       description: `Deposit via ${deposit.method} - Auto JayaPay`,
       reference: orderNum,
       status: 'success',
-    })
+    }),
+  ])
 
-    console.log('Deposit sukses:', orderNum, 'saldo:', saldoBaru)
-  } catch(e) {
-    console.log('Error:', e.message)
-  }
-
+  console.log('Deposit sukses:', orderNum, 'saldo baru:', saldoBaru)
   return new Response('SUCCESS', { status: 200 })
 }
 
