@@ -4,24 +4,18 @@ import { depositApi, userApi } from '../lib/api'
 import toast from 'react-hot-toast'
 
 const METODE_LIST = [
-  { kode: 'QRIS', label: 'QRIS', icon: '📱', grup: 'QRIS' },
-  { kode: 'GOPAY_QRIS', label: 'GoPay QRIS', icon: '💚', grup: 'QRIS' },
-  { kode: 'DANA_QRIS', label: 'Dana QRIS', icon: '💙', grup: 'QRIS' },
-  { kode: 'OVO', label: 'OVO', icon: '💜', grup: 'E-Wallet' },
-  { kode: 'DANA', label: 'Dana', icon: '💙', grup: 'E-Wallet' },
-  { kode: 'SHOPEEPAY', label: 'ShopeePay', icon: '🧡', grup: 'E-Wallet' },
-  { kode: 'LINKAJA', label: 'LinkAja', icon: '❤️', grup: 'E-Wallet' },
-  { kode: 'BCA', label: 'BCA', icon: '🔵', grup: 'Bank' },
-  { kode: 'BRI', label: 'BRI', icon: '🔵', grup: 'Bank' },
-  { kode: 'BNI', label: 'BNI', icon: '🟠', grup: 'Bank' },
-  { kode: 'MANDIRI', label: 'Mandiri', icon: '🟡', grup: 'Bank' },
-  { kode: 'TRANSFER_BCA', label: 'Transfer BCA', icon: '🏦', grup: 'Transfer' },
-  { kode: 'ALFAMART', label: 'Alfamart', icon: '🏪', grup: 'Retail' },
+  { kode: 'QRIS', label: 'QRIS', icon: '📱', grup: 'E-Money' },
+  { kode: 'DANA', label: 'DANA', icon: '💙', grup: 'E-Money' },
+  { kode: 'BRI', label: 'BRI', icon: '🔵', grup: 'VA Transfer' },
+  { kode: 'BNI', label: 'BNI', icon: '🟠', grup: 'VA Transfer' },
+  { kode: 'PERMATA', label: 'Permata', icon: '💎', grup: 'VA Transfer' },
+  { kode: 'MANDIRI', label: 'Mandiri', icon: '🟡', grup: 'VA Transfer' },
+  { kode: 'CIMB', label: 'CIMB', icon: '🔴', grup: 'VA Transfer' },
 ]
 
 const NOMINAL_CEPAT = [20000, 50000, 100000, 200000, 500000, 1000000]
 
-const GRUP_URUTAN = ['QRIS', 'E-Wallet', 'Bank', 'Transfer', 'Retail']
+const GRUP_URUTAN = ['E-Money', 'VA Transfer']
 
 export default function Deposit() {
   const { user, syncSaldo } = useAuth()
