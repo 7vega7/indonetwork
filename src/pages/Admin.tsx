@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import { adminApi } from '../lib/api'
 import toast from 'react-hot-toast'
+import AdminChatEmbed from '../components/AdminChatEmbed'
 import ImageUpload from '../components/ImageUpload'
 
 const TAB = [
@@ -15,6 +16,7 @@ const TAB = [
   { kode: 'banner', label: '🖼️ Banner' },
   { kode: 'promosi', label: '🎁 Promosi' },
   { kode: 'settings', label: '⚙️ Settings' },
+  { kode: 'chat', label: '💬 Live Chat' },
 ]
 
 const STATUS_COLOR: Record<string, string> = {
@@ -537,6 +539,13 @@ export default function Admin() {
           )}
         </div>
       )}
+      {/* Chat */}
+      {tab === 'chat' && (
+        <div style={{ margin: '-20px', height: 'calc(100vh - 180px)', minHeight: 500 }}>
+          <AdminChatEmbed />
+        </div>
+      )}
+
       {/* Modal Tambah Saldo */}
       {modalUser && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>

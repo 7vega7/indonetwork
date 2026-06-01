@@ -64,10 +64,8 @@ export default function App() {
         <Route path="promosi/:slug" element={<Promosi />} />
         <Route path="admin-login" element={<AdminLogin />} />
       </Route>
-    <Route path="admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
-        <Route index element={<Admin />} />
-        <Route path="chat" element={<AdminChat />} />
-      </Route>
+        <Route path="admin" element={<AdminGuard><Admin /></AdminGuard>} />
+        <Route path="admin/chat" element={<AdminGuard><AdminChat /></AdminGuard>} />
     </Routes>
   )
 }
