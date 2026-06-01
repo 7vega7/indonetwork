@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
+import { useBrand } from './hooks/useBrand'
 import Layout from './components/Layout'
 import Beranda from './pages/Beranda'
 import Login from './pages/Login'
@@ -10,7 +11,6 @@ import Withdraw from './pages/Withdraw'
 import Profil from './pages/Profil'
 import Riwayat from './pages/Riwayat'
 import Admin from './pages/Admin'
-import { useBrand } from './hooks/useBrand'
 import Promosi from './pages/Promosi'
 
 function Guard({ children }: { children: React.ReactNode }) {
@@ -26,21 +26,28 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { maintenance_aktif, maintenance_pesan, nama } = useBrand()
+  const { user } = useAuth()
+  const { maintenance_aktif, maintenance_pesan, nama, loaded } = useBrand()
 
-  const { user, isLoggedIn } = useAuth()
   const path = window.location.hash
-  const isAdminPath = path.includes("/admin") || path.includes("/masuk")
-  if (maintenance_aktif && user?.role !== "admin" && !isAdminPath) return (
+  const isAdminPath = path.includes('/admin') || path.includes('/masuk')
+  const isAdmin = user?.role === 'admin'
+
+  // Tampilkan maintenance hanya setelah brand loaded, bukan admin, bukan halaman login/admin
+  if (maintenance_aktif && loaded && !isAdmin && !isAdminPath) return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
       <div style={{ textAlign: 'center', maxWidth: 400 }}>
-        <div style={{ fontFamily: 'var(--display)', fontSize: 32, fontWeight: 900, background: 'linear-gradient(135deg,#00c8ff,#7b2fff,#ff2d78)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: 20 }}>{nama}</div>
+        <div style={{ fontFamily: 'var(--display)', fontSize: 32, fontWeight: 900, background: 'linear-gradient(135deg,#00c8ff,#7b2fff,#ff2d78)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: 20 }}>{nama || 'INDONETWORK'}</div>
         <div style={{ fontSize: 48, marginBottom: 16 }}>🔧</div>
         <div style={{ fontFamily: 'var(--display)', fontSize: 18, fontWeight: 700, marginBottom: 12, color: 'var(--gold)' }}>MAINTENANCE</div>
-        <div style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.6 }}>{maintenance_pesan}</div>
+        <div style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.6 }}>{maintenance_pesan || 'Website sedang dalam pemeliharaan.'}</div>
+        <div style={{ marginTop: 20, fontSize: 12, color: 'var(--muted)' }}>
+          Admin? <a href="/#/masuk" style={{ color: 'var(--blue)' }}>Login di sini</a>
+        </div>
       </div>
     </div>
   )
+
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
