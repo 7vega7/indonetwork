@@ -18,48 +18,51 @@ export async function onRequestPost({ request, env }) {
         for (const [k, v] of params.entries()) body[k] = v
       }
     }
-    console.log('JayaPay callback:', JSON.stringify(body))
   } catch(e) {
     return new Response('SUCCESS', { status: 200 })
   }
 
-  const settings = await getSettings(env)
+  // Debug - simpan ke callback_logs
+  const sb = getSupabase(env)
+  await sb.from('callback_logs').insert({
+    method: body.status || 'unknown',
+    payload: JSON.stringify(body),
+    ip: request.headers.get('CF-Connecting-IP') || 'unknown',
+  }).catch(() => {})
 
-  // Verifikasi signature
-  const valid = await verifyCallback(body, settings['jayapay_public_key'])
+  const settings = await getSettings(env)
+  const publicKey = settings['jayapay_public_key'] || ''
+
+  const valid = await verifyCallback(body, publicKey)
   if (!valid) {
-    console.log('Invalid signature')
+    await sb.from('callback_logs').insert({ method: 'INVALID_SIGN', payload: 'publicKey length: ' + publicKey.length, ip: 'system' }).catch(() => {})
     return new Response('SUCCESS', { status: 200 })
   }
 
   const status = parseCallbackStatus(body)
   if (status !== 'paid') {
-    console.log('Status bukan paid:', status)
     return new Response('SUCCESS', { status: 200 })
   }
 
   const { orderNum, platOrderNum } = body
-  const sb = getSupabase(env)
 
-  // Cari deposit - termasuk yang sudah success (idempoten)
-  const { data: deposit } = await sb
+  // Cari deposit
+  const { data: deposit, error: depError } = await sb
     .from('deposits')
     .select('*, users(username, balance)')
     .eq('reference', orderNum)
     .maybeSingle()
 
-  if (!deposit) {
-    console.log('Deposit tidak ditemukan:', orderNum)
-    return new Response('SUCCESS', { status: 200 })
-  }
+  await sb.from('callback_logs').insert({
+    method: 'DEPOSIT_SEARCH',
+    payload: JSON.stringify({ orderNum, found: !!deposit, error: depError?.message }),
+    ip: 'system',
+  }).catch(() => {})
 
-  // Jika sudah success, skip
-  if (deposit.status === 'success') {
-    console.log('Deposit sudah diproses:', orderNum)
-    return new Response('SUCCESS', { status: 200 })
-  }
+  if (!deposit) return new Response('SUCCESS', { status: 200 })
+  if (deposit.status === 'success') return new Response('SUCCESS', { status: 200 })
 
-  // Kirim saldo ke NexusGGR
+  // Kirim ke NexusGGR
   const agentSign = deposit.id.replace(/-/g, '_')
   const nexusRes = await nexus(env, {
     method: 'user_deposit',
@@ -68,29 +71,25 @@ export async function onRequestPost({ request, env }) {
     agent_sign: agentSign,
   })
 
+  await sb.from('callback_logs').insert({
+    method: 'NEXUS_RESULT',
+    payload: JSON.stringify(nexusRes),
+    ip: 'system',
+  }).catch(() => {})
+
   if (!nexusRes || nexusRes.status !== 1) {
-    // Cek apakah sudah pernah deposit (duplicate)
-    if (nexusRes?.msg?.includes('Duplicated') || nexusRes?.msg?.includes('duplicate')) {
-      console.log('Duplicate NexusGGR deposit, lanjut update status')
-    } else {
-      console.log('Gagal deposit NexusGGR:', nexusRes?.msg)
-      return new Response('SUCCESS', { status: 200 })
-    }
+    return new Response('SUCCESS', { status: 200 })
   }
 
-  const saldoBaru = nexusRes?.user_balance || (deposit.users.balance + deposit.amount)
+  const saldoBaru = nexusRes.user_balance
 
-  // Update semua sekaligus
   await Promise.all([
-    // Update saldo Supabase
     sb.from('users').update({ balance: saldoBaru }).eq('id', deposit.user_id),
-    // Update status deposit
     sb.from('deposits').update({
       status: 'success',
       plat_order_num: platOrderNum || null,
       updated_at: new Date().toISOString(),
     }).eq('id', deposit.id),
-    // Catat transaksi
     sb.from('transactions').insert({
       user_id: deposit.user_id,
       type: 'deposit',
@@ -103,7 +102,6 @@ export async function onRequestPost({ request, env }) {
     }),
   ])
 
-  console.log('Deposit sukses:', orderNum, 'saldo baru:', saldoBaru)
   return new Response('SUCCESS', { status: 200 })
 }
 
