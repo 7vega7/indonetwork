@@ -13,6 +13,7 @@ const TAB = [
   { kode: 'providers', label: '🎮 Providers' },
   { kode: 'banner', label: '🖼️ Banner' },
   { kode: 'promosi', label: '🎁 Promosi' },
+  { kode: 'settings', label: '⚙️ Settings' },
 ]
 
 const STATUS_COLOR: Record<string, string> = {
@@ -59,6 +60,7 @@ export default function Admin() {
   const [providers, setProviders] = useState<any[]>([])
   const [banners, setBanners] = useState<any[]>([])
   const [promosiList, setPromosiList] = useState<any[]>([])
+  const [settingsList, setSettingsList] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [cari, setCari] = useState('')
   const [statusFilter, setStatusFilter] = useState('pending')
@@ -82,6 +84,7 @@ export default function Admin() {
     else if (tab === 'providers') muatProviders()
     else if (tab === 'banner') muatBanners()
     else if (tab === 'promosi') muatPromosi()
+    else if (tab === 'settings') muatSettings()
   }, [tab, statusFilter])
 
   const muatStats = async () => { const d = await apiCall('/admin/stats'); setStats(d.stats) }
@@ -90,6 +93,7 @@ export default function Admin() {
   const muatUsers = async () => { setLoading(true); const d = await apiCall(`/admin/users?cari=${cari}`); setUsers(d.users || []); setLoading(false) }
   const muatProviders = async () => { setLoading(true); const d = await apiCall('/admin/providers'); setProviders(d.providers || []); setLoading(false) }
   const muatBanners = async () => { setLoading(true); const d = await apiCall('/admin/banners'); setBanners(d.banners || []); setLoading(false) }
+  const muatSettings = async () => { setLoading(true); const d = await apiCall('/admin/settings'); setSettingsList(d.settings || []); setLoading(false) }
   const muatPromosi = async () => { setLoading(true); const d = await apiCall('/admin/promosi'); setPromosiList(d.promosi || []); setLoading(false) }
 
   const konfirmasiDeposit = async (id: string) => {
