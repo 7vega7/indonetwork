@@ -2,6 +2,7 @@ import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useBrand } from '../hooks/useBrand'
+import LiveChat from './LiveChat'
 import toast from 'react-hot-toast'
 
 const NAV_ITEMS = [
@@ -167,6 +168,7 @@ export default function Layout() {
           <span>⚠️ Khusus 18+ | Bermain Secara Bertanggung Jawab</span>
         </div>
       </footer>
+      <LiveChat />
     </div>
   )
 }

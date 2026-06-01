@@ -14,6 +14,7 @@ const TAB = [
   { kode: 'banner', label: '🖼️ Banner' },
   { kode: 'promosi', label: '🎁 Promosi' },
   { kode: 'settings', label: '⚙️ Settings' },
+  { kode: 'chat', label: '💬 Live Chat' },
 ]
 
 const STATUS_COLOR: Record<string, string> = {
@@ -534,6 +535,18 @@ export default function Admin() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Chat */}
+      {tab === 'chat' && (
+        <div style={{ textAlign: 'center', padding: 40 }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>💬</div>
+          <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 8 }}>Live Chat Admin</div>
+          <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 20 }}>Kelola percakapan dengan semua user</div>
+          <a href='/#/admin/chat' className='btn btn-primary' style={{ padding: '12px 32px', fontSize: 14, textDecoration: 'none', display: 'inline-block' }}>
+            Buka Live Chat →
+          </a>
         </div>
       )}
 
