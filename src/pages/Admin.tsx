@@ -15,7 +15,6 @@ const TAB = [
   { kode: 'banner', label: '🖼️ Banner' },
   { kode: 'promosi', label: '🎁 Promosi' },
   { kode: 'settings', label: '⚙️ Settings' },
-  { kode: 'chat', label: '💬 Live Chat' },
 ]
 
 const STATUS_COLOR: Record<string, string> = {
@@ -538,19 +537,6 @@ export default function Admin() {
           )}
         </div>
       )}
-
-      {/* Chat */}
-      {tab === 'chat' && (
-        <div style={{ textAlign: 'center', padding: 40 }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>💬</div>
-          <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 8 }}>Live Chat Admin</div>
-          <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 20 }}>Kelola percakapan dengan semua user</div>
-          <button className='btn btn-primary' onClick={() => navigate('/admin/chat')} style={{ padding: '12px 32px', fontSize: 14 }}>
-            Buka Live Chat →
-          </button>
-        </div>
-      )}
-
       {/* Modal Tambah Saldo */}
       {modalUser && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>

@@ -99,7 +99,7 @@ export default function AdminChat() {
   const totalUnread = chatUsers.reduce((s, u) => s + u.belum_dibaca, 0)
 
   return (
-    <div style={{ height: 'calc(100vh - 60px)', display: 'flex', overflow: 'hidden' }}>
+    <div style={{ height: 'calc(100vh - 110px)', display: 'flex', overflow: 'hidden' }}>
 
       {/* Sidebar Users */}
       {(!isMobile || !selectedUser) && (

@@ -13,6 +13,7 @@ import Riwayat from './pages/Riwayat'
 import Admin from './pages/Admin'
 import Promosi from './pages/Promosi'
 import AdminLogin from './pages/AdminLogin'
+import AdminLayout from './components/AdminLayout'
 import AdminChat from './pages/AdminChat'
 
 function Guard({ children }: { children: React.ReactNode }) {
@@ -61,9 +62,11 @@ export default function App() {
         <Route path="riwayat" element={<Guard><Riwayat /></Guard>} />
         <Route path="promosi" element={<Promosi />} />
         <Route path="promosi/:slug" element={<Promosi />} />
-        <Route path="admin" element={<AdminGuard><Admin /></AdminGuard>} />
         <Route path="admin-login" element={<AdminLogin />} />
-        <Route path="admin/chat" element={<AdminGuard><AdminChat /></AdminGuard>} />
+      </Route>
+    <Route path="admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
+        <Route index element={<Admin />} />
+        <Route path="chat" element={<AdminChat />} />
       </Route>
     </Routes>
   )
