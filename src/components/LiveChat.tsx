@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import toast from 'react-hot-toast'
 import { useAuth } from '../hooks/useAuth'
 import { useBrand } from '../hooks/useBrand'
 
@@ -70,8 +71,10 @@ export default function LiveChat() {
       if (data.chat) {
         setChats(prev => [...prev, data.chat])
         setPesan('')
+      } else {
+        toast.error(data.error || 'Gagal kirim pesan')
       }
-    } catch { }
+    } catch(e: any) { toast.error('Gagal kirim pesan') }
     finally { setLoading(false) }
   }
 
