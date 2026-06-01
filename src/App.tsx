@@ -33,16 +33,7 @@ export default function App() {
   const isAdmin = user?.role === 'admin'
   const path = window.location.hash
 
-  // Halaman admin-login selalu bisa diakses
-  if (path.includes('/admin-login')) {
-    return (
-      <Routes>
-        <Route path="/admin-login" element={<AdminLogin />} />
-      </Routes>
-    )
-  }
-
-  // Maintenance mode
+// Maintenance mode
   if (maintenance_aktif && loaded && !isAdmin) return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
       <div style={{ textAlign: 'center', maxWidth: 400 }}>
@@ -50,9 +41,7 @@ export default function App() {
         <div style={{ fontSize: 48, marginBottom: 16 }}>🔧</div>
         <div style={{ fontFamily: 'var(--display)', fontSize: 18, fontWeight: 700, marginBottom: 12, color: 'var(--gold)' }}>MAINTENANCE</div>
         <div style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.6 }}>{maintenance_pesan || 'Website sedang dalam pemeliharaan.'}</div>
-        <div style={{ marginTop: 20 }}>
-          <a href="/#/admin-login" style={{ fontSize: 12, color: 'var(--blue)' }}>Admin? Login di sini</a>
-        </div>
+
       </div>
     </div>
   )
