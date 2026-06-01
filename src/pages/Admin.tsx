@@ -455,22 +455,22 @@ export default function Admin() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {[
-                { judul: '🏷️ Brand', prefix: 'brand' },
-                { judul: '⚙️ Sistem', prefix: 'maintenance' },
-                { judul: '💬 Kontak CS', prefix: 'whatsapp' },
-                { judul: '💬 Kontak CS', prefix: 'telegram' },
-                { judul: '💬 Kontak CS', prefix: 'livechat' },
-                { judul: '📝 Konten', prefix: 'marquee' },
-                { judul: '📝 Konten', prefix: 'footer' },
-                { judul: '💰 Transaksi', prefix: 'min_' },
-                { judul: '💰 Transaksi', prefix: 'max_' },
-                { judul: '🎁 Bonus', prefix: 'register' },
-                { judul: '🎁 Bonus', prefix: 'freebet' },
-                { judul: '💳 JayaPay', prefix: 'jayapay' },
-                { judul: '💰 Deposit', prefix: 'deposit' },
-                { judul: '🎁 Freebet', prefix: 'freebet' },
+                { judul: '🏷️ Brand', prefix: 'brand_' },
+                { judul: '⚙️ Maintenance', prefix: 'maintenance_' },
+                { judul: '💬 Kontak CS', prefix: 'whatsapp_url' },
+                { judul: '💬 Kontak CS', prefix: 'telegram_url' },
+                { judul: '💬 Kontak CS', prefix: 'livechat_url' },
+                { judul: '📝 Konten', prefix: 'marquee_teks' },
+                { judul: '📝 Konten', prefix: 'footer_teks' },
+                { judul: '💰 Transaksi', prefix: 'min_deposit' },
+                { judul: '💰 Transaksi', prefix: 'min_withdraw' },
+                { judul: '💰 Transaksi', prefix: 'max_withdraw' },
+                { judul: '💰 Transaksi', prefix: 'deposit_timeout_menit' },
+                { judul: '🎁 Bonus Register', prefix: 'register_bonus_' },
+                { judul: '🎁 Freebet', prefix: 'freebet_' },
+                { judul: '💳 JayaPay', prefix: 'jayapay_' },
               ].map(group => {
-                const items = settingsList.filter(s => s.kunci.startsWith(group.prefix)).filter(s => !s.kunci.replace(group.prefix, '').includes('_') || group.prefix.endsWith('_'))
+                const items = settingsList.filter(s => s.kunci.startsWith(group.prefix))
                 return (
                   <div key={group.prefix} className='card'>
                     <div style={{ fontWeight: 700, marginBottom: 14, color: 'var(--gold)' }}>{group.judul}</div>
