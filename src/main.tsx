@@ -4,6 +4,10 @@ import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import App from './App'
 import './styles/global.css'
+import { useBrand } from './hooks/useBrand'
+
+// Load brand settings
+useBrand.getState().load()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

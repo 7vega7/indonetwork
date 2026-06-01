@@ -10,6 +10,7 @@ import Withdraw from './pages/Withdraw'
 import Profil from './pages/Profil'
 import Riwayat from './pages/Riwayat'
 import Admin from './pages/Admin'
+import { useBrand } from './hooks/useBrand'
 import Promosi from './pages/Promosi'
 
 function Guard({ children }: { children: React.ReactNode }) {
@@ -25,6 +26,18 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const { maintenance_aktif, maintenance_pesan, nama } = useBrand()
+
+  if (maintenance_aktif) return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+      <div style={{ textAlign: 'center', maxWidth: 400 }}>
+        <div style={{ fontFamily: 'var(--display)', fontSize: 32, fontWeight: 900, background: 'linear-gradient(135deg,#00c8ff,#7b2fff,#ff2d78)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: 20 }}>{nama}</div>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>🔧</div>
+        <div style={{ fontFamily: 'var(--display)', fontSize: 18, fontWeight: 700, marginBottom: 12, color: 'var(--gold)' }}>MAINTENANCE</div>
+        <div style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.6 }}>{maintenance_pesan}</div>
+      </div>
+    </div>
+  )
   return (
     <Routes>
       <Route path="/" element={<Layout />}>

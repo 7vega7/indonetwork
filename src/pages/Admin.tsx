@@ -455,6 +455,15 @@ export default function Admin() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {[
+                { judul: '🏷️ Brand', prefix: 'brand' },
+                { judul: '⚙️ Sistem', prefix: 'maintenance' },
+                { judul: '💬 Kontak', prefix: 'whatsapp' },
+                { judul: '💬 Kontak', prefix: 'telegram' },
+                { judul: '📝 Konten', prefix: 'marquee' },
+                { judul: '📝 Konten', prefix: 'footer' },
+                { judul: '💰 Transaksi', prefix: 'min_' },
+                { judul: '💰 Transaksi', prefix: 'max_' },
+                { judul: '🎁 Register', prefix: 'register' },
                 { judul: '💳 JayaPay', prefix: 'jayapay' },
                 { judul: '💰 Deposit', prefix: 'deposit' },
                 { judul: '🎁 Freebet', prefix: 'freebet' },
