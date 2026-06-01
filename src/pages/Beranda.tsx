@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { gameApi } from '../lib/api'
+import { useBrand } from '../hooks/useBrand'
 import Aktivitas from '../components/Aktivitas'
 import toast from 'react-hot-toast'
 
@@ -39,6 +40,7 @@ const PROVIDER_LIST = [
 
 export default function Beranda() {
   const { isLoggedIn } = useAuth()
+  const brand = useBrand()
   const navigate = useNavigate()
   const [slide, setSlide] = useState(0)
   const [hotGames, setHotGames] = useState<any[]>([])

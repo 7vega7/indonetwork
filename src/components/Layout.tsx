@@ -59,10 +59,14 @@ export default function Layout() {
 
           {/* Logo */}
           <Link to="/" style={{ flexShrink: 0 }}>
-            <div style={{ fontFamily: 'var(--display)', fontSize: 18, fontWeight: 900, letterSpacing: 2, background: 'linear-gradient(135deg,#00c8ff,#7b2fff,#ff2d78)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', lineHeight: 1 }}>
-              INDONETWORK
-              <div style={{ fontSize: 7, letterSpacing: 5, color: 'var(--gold)', WebkitTextFillColor: 'var(--gold)', marginTop: 1 }}>CASINO</div>
-            </div>
+            {brand.logo_url ? (
+              <img src={brand.logo_url} alt={brand.nama} style={{ height: 36, objectFit: 'contain' }} />
+            ) : (
+              <div style={{ fontFamily: 'var(--display)', fontSize: 18, fontWeight: 900, letterSpacing: 2, background: `linear-gradient(135deg,${brand.warna_utama || '#00c8ff'},${brand.warna_ketiga || '#7b2fff'},${brand.warna_aksen || '#ff2d78'})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', lineHeight: 1 }}>
+                {brand.nama || 'INDONETWORK'}
+                <div style={{ fontSize: 7, letterSpacing: 5, color: 'var(--gold)', WebkitTextFillColor: 'var(--gold)', marginTop: 1 }}>{brand.tagline || 'CASINO'}</div>
+              </div>
+            )}
           </Link>
 
           {/* Desktop Nav */}
@@ -139,13 +143,17 @@ export default function Layout() {
       <footer className="desktop-only" style={{ background: 'var(--bg3)', borderTop: '1px solid rgba(0,200,255,0.1)', padding: '24px 20px 16px', marginTop: 32 }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 16 }}>
           <div>
-            <div style={{ fontFamily: 'var(--display)', fontSize: 16, fontWeight: 900, background: 'linear-gradient(135deg,#00c8ff,#7b2fff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: 8 }}>INDONETWORK</div>
-            <div style={{ fontSize: 12, color: 'var(--muted)', maxWidth: 300, lineHeight: 1.6 }}>Platform game online terpercaya dengan sistem keamanan terdepan dan layanan 24 jam.</div>
+            <div style={{ fontFamily: 'var(--display)', fontSize: 16, fontWeight: 900, background: `linear-gradient(135deg,${brand.warna_utama||'#00c8ff'},${brand.warna_ketiga||'#7b2fff'})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: 8 }}>{brand.nama || 'INDONETWORK'}</div>
+            <div style={{ fontSize: 12, color: 'var(--muted)', maxWidth: 300, lineHeight: 1.6 }}>{brand.footer_teks || 'Platform game online terpercaya.'}</div>
           </div>
           <div style={{ display: 'flex', gap: 40 }}>
             {[
               { judul: 'Game', links: ['🎰 Slot', '🃏 Live Casino', '🚀 Crash Game', '⚽ Sportsbook'] },
-              { judul: 'Bantuan', links: ['📱 WhatsApp', '💬 Live Chat', '📩 Telegram'] },
+              { judul: 'Bantuan', links: [
+              brand.whatsapp_url ? '📱 WhatsApp' : null,
+              brand.livechat_url ? '💬 Live Chat' : null,
+              brand.telegram_url ? '📩 Telegram' : null,
+            ].filter(Boolean) },
             ].map(({ judul, links }) => (
               <div key={judul}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--blue)', marginBottom: 8, letterSpacing: 1 }}>{judul.toUpperCase()}</div>
@@ -155,7 +163,7 @@ export default function Layout() {
           </div>
         </div>
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 12, display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--muted)', flexWrap: 'wrap', gap: 8 }}>
-          <span>© 2024 INDONETWORK. Hak Cipta Dilindungi.</span>
+          <span>© {new Date().getFullYear()} {brand.nama || 'INDONETWORK'}. Hak Cipta Dilindungi.</span>
           <span>⚠️ Khusus 18+ | Bermain Secara Bertanggung Jawab</span>
         </div>
       </footer>

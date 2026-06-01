@@ -1,11 +1,12 @@
 // @ts-nocheck
 import { ok, err, getSupabase, signJWT, hashPassword, verifyTurnstile, nexus } from '../_utils';
+import { getSettings } from '../_settings';
 
 export async function onRequestPost({ request, env }) {
   let body;
   try { body = await request.json(); } catch { return err('Body tidak valid'); }
 
-  const { username, email, password, turnstile_token, referral_code } = body;
+  const { username, email, password, turnstile_token, referral_code, ref } = body;
 
   if (!username || !email || !password || !turnstile_token) return err('Semua kolom wajib diisi');
   if (username.length < 4 || username.length > 20) return err('Username harus 4-20 karakter');
@@ -30,8 +31,8 @@ export async function onRequestPost({ request, env }) {
 
   let referredById = null;
   if (referral_code) {
-    const { data: ref } = await sb.from('users').select('id').eq('referral_code', referral_code.toUpperCase()).maybeSingle();
-    if (ref) referredById = ref.id;
+    const { data: refUser } = await sb.from('users').select('id').eq('referral_code', referral_code.toUpperCase()).maybeSingle();
+    if (refUser) referredById = refUser.id;
   }
 
   const { data: user, error } = await sb.from('users').insert({
@@ -47,11 +48,56 @@ export async function onRequestPost({ request, env }) {
 
   if (error || !user) return err('Gagal membuat akun, coba lagi');
 
-  // Daftarkan ke NexusGGR Transfer API
+  // Daftarkan ke NexusGGR
   try {
     await nexus(env, { method: 'user_create', user_code: user.username });
-  } catch(e) {
-    console.error('NexusGGR user_create error:', e);
+  } catch(e) { console.error('NexusGGR user_create error:', e); }
+
+  // Ambil settings
+  const settings = await getSettings(env);
+
+  // Cek freebet (ref=app atau sesuai setting)
+  const freebetAktif = settings['freebet_aktif'] === 'true';
+  const freebetRef = settings['freebet_ref'] || 'app';
+  const freebetJumlah = parseInt(settings['freebet_jumlah'] || '10000');
+
+  // Cek register bonus
+  const registerBonusAktif = settings['register_bonus_aktif'] === 'true';
+  const registerBonusJumlah = parseInt(settings['register_bonus_jumlah'] || '0');
+
+  let saldoBonus = 0;
+
+  // Freebet untuk user dari webview/ref tertentu
+  if (freebetAktif && ref === freebetRef && freebetJumlah > 0) {
+    saldoBonus += freebetJumlah;
+  }
+
+  // Bonus register biasa
+  if (registerBonusAktif && registerBonusJumlah > 0) {
+    saldoBonus += registerBonusJumlah;
+  }
+
+  // Kirim bonus ke NexusGGR jika ada
+  if (saldoBonus > 0) {
+    try {
+      const agentSign = `reg_bonus_${user.id.replace(/-/g, '_')}`
+      const nexusRes = await nexus(env, {
+        method: 'user_deposit',
+        user_code: user.username,
+        amount: saldoBonus,
+        agent_sign: agentSign,
+      });
+      if (nexusRes?.status === 1) {
+        await sb.from('users').update({ balance: nexusRes.user_balance }).eq('id', user.id);
+        await sb.from('transactions').insert({
+          user_id: user.id, type: 'bonus', amount: saldoBonus,
+          balance_before: 0, balance_after: nexusRes.user_balance,
+          description: ref === freebetRef ? 'Freebet new member via app' : 'Bonus register',
+          status: 'success',
+        });
+        user.balance = nexusRes.user_balance;
+      }
+    } catch(e) { console.error('Bonus register error:', e); }
   }
 
   const token = await signJWT(

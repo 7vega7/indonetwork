@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useBrand } from '../hooks/useBrand'
 import { userApi } from '../lib/api'
 import toast from 'react-hot-toast'
 
@@ -149,7 +150,7 @@ export default function Withdraw() {
                   setJumlah(n ? parseInt(n).toLocaleString('id-ID') : '')
                 }} />
               <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 6 }}>
-                Minimal withdraw: Rp 50.000 • Saldo tersedia: Rp {(user?.saldo || 0).toLocaleString('id-ID')}
+                Minimal withdraw: Rp {(min_withdraw || 50000).toLocaleString('id-ID')} • Saldo tersedia: Rp {(user?.saldo || 0).toLocaleString('id-ID')}
               </div>
             </div>
 

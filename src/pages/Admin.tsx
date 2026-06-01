@@ -457,18 +457,20 @@ export default function Admin() {
               {[
                 { judul: '🏷️ Brand', prefix: 'brand' },
                 { judul: '⚙️ Sistem', prefix: 'maintenance' },
-                { judul: '💬 Kontak', prefix: 'whatsapp' },
-                { judul: '💬 Kontak', prefix: 'telegram' },
+                { judul: '💬 Kontak CS', prefix: 'whatsapp' },
+                { judul: '💬 Kontak CS', prefix: 'telegram' },
+                { judul: '💬 Kontak CS', prefix: 'livechat' },
                 { judul: '📝 Konten', prefix: 'marquee' },
                 { judul: '📝 Konten', prefix: 'footer' },
                 { judul: '💰 Transaksi', prefix: 'min_' },
                 { judul: '💰 Transaksi', prefix: 'max_' },
-                { judul: '🎁 Register', prefix: 'register' },
+                { judul: '🎁 Bonus', prefix: 'register' },
+                { judul: '🎁 Bonus', prefix: 'freebet' },
                 { judul: '💳 JayaPay', prefix: 'jayapay' },
                 { judul: '💰 Deposit', prefix: 'deposit' },
                 { judul: '🎁 Freebet', prefix: 'freebet' },
               ].map(group => {
-                const items = settingsList.filter(s => s.kunci.startsWith(group.prefix))
+                const items = settingsList.filter(s => s.kunci.startsWith(group.prefix)).filter(s => !s.kunci.replace(group.prefix, '').includes('_') || group.prefix.endsWith('_'))
                 return (
                   <div key={group.prefix} className='card'>
                     <div style={{ fontWeight: 700, marginBottom: 14, color: 'var(--gold)' }}>{group.judul}</div>

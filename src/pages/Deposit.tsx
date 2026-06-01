@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import { useBrand } from '../hooks/useBrand'
 import { depositApi, userApi } from '../lib/api'
 import toast from 'react-hot-toast'
 
@@ -19,6 +20,7 @@ const GRUP_URUTAN = ['E-Money', 'VA Transfer']
 
 export default function Deposit() {
   const { user, syncSaldo } = useAuth()
+  const { min_deposit } = useBrand()
   const [tab, setTab] = useState<'form' | 'pending' | 'riwayat'>('form')
   const [metode, setMetode] = useState('QRIS')
   const [jumlah, setJumlah] = useState('')
@@ -238,7 +240,7 @@ export default function Deposit() {
                   const n = e.target.value.replace(/\D/g, '')
                   setJumlah(n ? parseInt(n).toLocaleString('id-ID') : '')
                 }} />
-              <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 6 }}>Minimal deposit: Rp 10.000</div>
+              <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 6 }}>Minimal deposit: Rp {(min_deposit || 10000).toLocaleString('id-ID')}</div>
             </div>
 
             {/* Info tambahan */}
