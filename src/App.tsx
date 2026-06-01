@@ -31,10 +31,11 @@ export default function App() {
   const { maintenance_aktif, maintenance_pesan, nama, loaded } = useBrand()
 
   const isAdmin = user?.role === 'admin'
+  const isAdminLoginPath = window.location.hash.includes('/admin-login')
   const path = window.location.hash
 
 // Maintenance mode
-  if (maintenance_aktif && loaded && !isAdmin) return (
+  if (maintenance_aktif && loaded && !isAdmin && !isAdminLoginPath) return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
       <div style={{ textAlign: 'center', maxWidth: 400 }}>
         <div style={{ fontFamily: 'var(--display)', fontSize: 32, fontWeight: 900, background: 'linear-gradient(135deg,#00c8ff,#7b2fff,#ff2d78)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: 20 }}>{nama || 'INDONETWORK'}</div>
