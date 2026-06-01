@@ -78,7 +78,7 @@ export default function LiveChat() {
     finally { setLoading(false) }
   }
 
-  if (!isLoggedIn) return null
+  if (!isLoggedIn || user?.role === "admin") return null
 
   return (
     <>
