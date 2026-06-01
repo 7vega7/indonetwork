@@ -437,6 +437,88 @@ export default function Admin() {
         </div>
       )}
 
+      {/* Settings */}
+      {tab === 'settings' && (
+        <div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>
+            Konfigurasi sistem — JayaPay, freebet, dan pengaturan deposit.
+          </div>
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}><div className='spinner' /></div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {[
+                { judul: '💳 JayaPay', prefix: 'jayapay' },
+                { judul: '💰 Deposit', prefix: 'deposit' },
+                { judul: '🎁 Freebet', prefix: 'freebet' },
+              ].map(group => {
+                const items = settingsList.filter(s => s.kunci.startsWith(group.prefix))
+                return (
+                  <div key={group.prefix} className='card'>
+                    <div style={{ fontWeight: 700, marginBottom: 14, color: 'var(--gold)' }}>{group.judul}</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      {items.map(s => (
+                        <div key={s.kunci}>
+                          <label style={{ fontSize: 11, color: 'var(--muted)', display: 'block', marginBottom: 5 }}>
+                            {s.kunci}{s.deskripsi ? ' — ' + s.deskripsi : ''}
+                          </label>
+                          {s.kunci === 'jayapay_mode' ? (
+                            <select style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 12px', color: 'var(--text)', fontSize: 13, outline: 'none' }}
+                              value={s.nilai} onChange={e => setSettingsList(prev => prev.map(x => x.kunci === s.kunci ? { ...x, nilai: e.target.value } : x))}>
+                              <option value='test' style={{ background: '#111130' }}>test</option>
+                              <option value='live' style={{ background: '#111130' }}>live</option>
+                            </select>
+                          ) : s.kunci === 'jayapay_aktif' || s.kunci === 'freebet_aktif' ? (
+                            <select style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 12px', color: 'var(--text)', fontSize: 13, outline: 'none' }}
+                              value={s.nilai} onChange={e => setSettingsList(prev => prev.map(x => x.kunci === s.kunci ? { ...x, nilai: e.target.value } : x))}>
+                              <option value='false' style={{ background: '#111130' }}>❌ Nonaktif</option>
+                              <option value='true' style={{ background: '#111130' }}>✅ Aktif</option>
+                            </select>
+                          ) : (
+                            <input style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 12px', color: 'var(--text)', fontSize: 13, outline: 'none' }}
+                              type={s.kunci.includes('private_key') ? 'password' : 'text'}
+                              value={s.nilai || ''}
+                              placeholder={s.kunci.includes('private_key') ? 'Isi untuk update private key' : ''}
+                              onChange={e => setSettingsList(prev => prev.map(x => x.kunci === s.kunci ? { ...x, nilai: e.target.value } : x))}
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+
+              <button className='btn btn-primary' style={{ width: '100%', padding: 13 }}
+                onClick={async () => {
+                  const res = await apiCall('/admin/settings', { method: 'POST', body: JSON.stringify({ settings: settingsList }) })
+                  if (res.status === 0) toast.error(res.error)
+                  else { toast.success('Settings berhasil disimpan!'); muatSettings() }
+                }}>
+                💾 Simpan Semua Settings
+              </button>
+
+              <div className='card' style={{ borderColor: 'rgba(255,45,120,0.3)' }}>
+                <div style={{ fontWeight: 700, marginBottom: 10, color: 'var(--pink)' }}>🔧 Tools</div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button className='btn btn-outline' style={{ fontSize: 12 }}
+                    onClick={async () => {
+                      const res = await fetch('/deposit/expire')
+                      const d = await res.json()
+                      toast.success(d.pesan || 'Done')
+                    }}>⏰ Expire Deposit Kadaluarsa</button>
+                  <button className='btn btn-outline' style={{ fontSize: 12 }}
+                    onClick={async () => {
+                      const res = await apiCall('/admin/sync-users', { method: 'POST' })
+                      toast.success(res.pesan || 'Done')
+                    }}>🔄 Sync Users NexusGGR</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Modal Tambah Saldo */}
       {modalUser && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
