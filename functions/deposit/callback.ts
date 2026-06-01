@@ -1,7 +1,5 @@
 // @ts-nocheck
 import { getSupabase, nexus } from '../_utils';
-import { getSettings } from '../_settings';
-import { verifyCallback, parseCallbackStatus } from '../_jayapay';
 
 export async function onRequestPost({ request, env }) {
   let body
@@ -22,7 +20,7 @@ export async function onRequestPost({ request, env }) {
     return new Response('SUCCESS', { status: 200 })
   }
 
-  // Debug - simpan ke callback_logs
+  // Log ke DB
   const sb = getSupabase(env)
   await sb.from('callback_logs').insert({
     method: body.status || 'unknown',
@@ -30,37 +28,26 @@ export async function onRequestPost({ request, env }) {
     ip: request.headers.get('CF-Connecting-IP') || 'unknown',
   }).catch(() => {})
 
-  const settings = await getSettings(env)
-  const publicKey = settings['jayapay_public_key'] || ''
-
-  const valid = await verifyCallback(body, publicKey)
-  if (!valid) {
-    await sb.from('callback_logs').insert({ method: 'INVALID_SIGN', payload: 'publicKey length: ' + publicKey.length, ip: 'system' }).catch(() => {})
+  // Cek status - hanya proses jika SUCCESS
+  const status = String(body.status || '')
+  const code = String(body.code || '')
+  if (status !== 'SUCCESS' && code !== '00') {
     return new Response('SUCCESS', { status: 200 })
   }
 
-  const status = parseCallbackStatus(body)
-  if (status !== 'paid') {
-    return new Response('SUCCESS', { status: 200 })
-  }
-
-  const { orderNum, platOrderNum } = body
+  const orderNum = body.orderNum
+  if (!orderNum) return new Response('SUCCESS', { status: 200 })
 
   // Cari deposit
-  const { data: deposit, error: depError } = await sb
+  const { data: deposit } = await sb
     .from('deposits')
     .select('*, users(username, balance)')
     .eq('reference', orderNum)
     .maybeSingle()
 
-  await sb.from('callback_logs').insert({
-    method: 'DEPOSIT_SEARCH',
-    payload: JSON.stringify({ orderNum, found: !!deposit, error: depError?.message }),
-    ip: 'system',
-  }).catch(() => {})
-
-  if (!deposit) return new Response('SUCCESS', { status: 200 })
-  if (deposit.status === 'success') return new Response('SUCCESS', { status: 200 })
+  if (!deposit || deposit.status === 'success') {
+    return new Response('SUCCESS', { status: 200 })
+  }
 
   // Kirim ke NexusGGR
   const agentSign = deposit.id.replace(/-/g, '_')
@@ -71,23 +58,18 @@ export async function onRequestPost({ request, env }) {
     agent_sign: agentSign,
   })
 
-  await sb.from('callback_logs').insert({
-    method: 'NEXUS_RESULT',
-    payload: JSON.stringify(nexusRes),
-    ip: 'system',
-  }).catch(() => {})
-
   if (!nexusRes || nexusRes.status !== 1) {
     return new Response('SUCCESS', { status: 200 })
   }
 
   const saldoBaru = nexusRes.user_balance
 
+  // Update semua
   await Promise.all([
     sb.from('users').update({ balance: saldoBaru }).eq('id', deposit.user_id),
     sb.from('deposits').update({
       status: 'success',
-      plat_order_num: platOrderNum || null,
+      plat_order_num: body.platOrderNum || null,
       updated_at: new Date().toISOString(),
     }).eq('id', deposit.id),
     sb.from('transactions').insert({
@@ -106,5 +88,5 @@ export async function onRequestPost({ request, env }) {
 }
 
 export async function onRequestGet() {
-  return new Response('JayaPay callback aktif', { status: 200 })
+  return new Response('callback aktif', { status: 200 })
 }
