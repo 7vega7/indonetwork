@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { adminApi } from '../lib/api'
 import toast from 'react-hot-toast'
 import ImageUpload from '../components/ImageUpload'
@@ -544,9 +545,9 @@ export default function Admin() {
           <div style={{ fontSize: 48, marginBottom: 16 }}>💬</div>
           <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 8 }}>Live Chat Admin</div>
           <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 20 }}>Kelola percakapan dengan semua user</div>
-          <a href='/#/admin/chat' className='btn btn-primary' style={{ padding: '12px 32px', fontSize: 14, textDecoration: 'none', display: 'inline-block' }}>
+          <button className='btn btn-primary' onClick={() => navigate('/admin/chat')} style={{ padding: '12px 32px', fontSize: 14 }}>
             Buka Live Chat →
-          </a>
+          </button>
         </div>
       )}
 
