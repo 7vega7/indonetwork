@@ -28,8 +28,10 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
 export default function App() {
   const { maintenance_aktif, maintenance_pesan, nama } = useBrand()
 
-  const { user } = useAuth()
-  if (maintenance_aktif && user?.role !== "admin") return (
+  const { user, isLoggedIn } = useAuth()
+  const path = window.location.hash
+  const isAdminPath = path.includes("/admin") || path.includes("/masuk")
+  if (maintenance_aktif && user?.role !== "admin" && !isAdminPath) return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
       <div style={{ textAlign: 'center', maxWidth: 400 }}>
         <div style={{ fontFamily: 'var(--display)', fontSize: 32, fontWeight: 900, background: 'linear-gradient(135deg,#00c8ff,#7b2fff,#ff2d78)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: 20 }}>{nama}</div>
