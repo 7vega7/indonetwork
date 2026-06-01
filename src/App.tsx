@@ -12,6 +12,7 @@ import Profil from './pages/Profil'
 import Riwayat from './pages/Riwayat'
 import Admin from './pages/Admin'
 import Promosi from './pages/Promosi'
+import AdminLogin from './pages/AdminLogin'
 
 function Guard({ children }: { children: React.ReactNode }) {
   const { isLoggedIn } = useAuth()
@@ -20,7 +21,7 @@ function Guard({ children }: { children: React.ReactNode }) {
 
 function AdminGuard({ children }: { children: React.ReactNode }) {
   const { isLoggedIn, user } = useAuth()
-  if (!isLoggedIn) return <Navigate to="/masuk" replace />
+  if (!isLoggedIn) return <Navigate to="/admin-login" replace />
   if (user?.role !== 'admin') return <Navigate to="/" replace />
   return <>{children}</>
 }
@@ -29,20 +30,28 @@ export default function App() {
   const { user } = useAuth()
   const { maintenance_aktif, maintenance_pesan, nama, loaded } = useBrand()
 
-  const path = window.location.hash
-  const isAdminPath = path.includes('/admin') || path.includes('/masuk')
   const isAdmin = user?.role === 'admin'
+  const path = window.location.hash
 
-  // Tampilkan maintenance hanya setelah brand loaded, bukan admin, bukan halaman login/admin
-  if (maintenance_aktif && loaded && !isAdmin && !isAdminPath) return (
+  // Halaman admin-login selalu bisa diakses
+  if (path.includes('/admin-login')) {
+    return (
+      <Routes>
+        <Route path="/admin-login" element={<AdminLogin />} />
+      </Routes>
+    )
+  }
+
+  // Maintenance mode
+  if (maintenance_aktif && loaded && !isAdmin) return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
       <div style={{ textAlign: 'center', maxWidth: 400 }}>
         <div style={{ fontFamily: 'var(--display)', fontSize: 32, fontWeight: 900, background: 'linear-gradient(135deg,#00c8ff,#7b2fff,#ff2d78)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: 20 }}>{nama || 'INDONETWORK'}</div>
         <div style={{ fontSize: 48, marginBottom: 16 }}>🔧</div>
         <div style={{ fontFamily: 'var(--display)', fontSize: 18, fontWeight: 700, marginBottom: 12, color: 'var(--gold)' }}>MAINTENANCE</div>
         <div style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.6 }}>{maintenance_pesan || 'Website sedang dalam pemeliharaan.'}</div>
-        <div style={{ marginTop: 20, fontSize: 12, color: 'var(--muted)' }}>
-          Admin? <a href="/#/masuk" style={{ color: 'var(--blue)' }}>Login di sini</a>
+        <div style={{ marginTop: 20 }}>
+          <a href="/#/admin-login" style={{ fontSize: 12, color: 'var(--blue)' }}>Admin? Login di sini</a>
         </div>
       </div>
     </div>
@@ -62,6 +71,7 @@ export default function App() {
         <Route path="promosi" element={<Promosi />} />
         <Route path="promosi/:slug" element={<Promosi />} />
         <Route path="admin" element={<AdminGuard><Admin /></AdminGuard>} />
+        <Route path="admin-login" element={<AdminLogin />} />
       </Route>
     </Routes>
   )
