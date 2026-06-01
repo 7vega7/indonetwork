@@ -12,7 +12,7 @@ export async function onRequestPost({ request, env }) {
   const settings = await getSettings(env)
 
   // Verifikasi signature dari JayaPay
-  if (settings['jayapay_public_key']) {
+  if (settings['jayapay_public_key'] && settings['jayapay_public_key'].length > 10) {
     const valid = await verifySign(body, settings['jayapay_public_key'])
     if (!valid) {
       console.log('Invalid signature dari JayaPay')
