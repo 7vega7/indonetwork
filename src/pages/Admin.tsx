@@ -89,7 +89,7 @@ export default function Admin() {
   const [modalStaffResetPass, setModalStaffResetPass] = useState<any>(null)
   const [staffResetPass, setStaffResetPass] = useState('')
   const [modalEditOwner, setModalEditOwner] = useState(false)
-  const [ownerForm, setOwnerForm] = useState({ nama_lengkap: '', no_telepon: '', email: '', bank: '', no_rekening: '', atas_nama: '' })
+  const [ownerForm, setOwnerForm] = useState({ username: '', nama_lengkap: '', no_telepon: '', email: '', bank: '', no_rekening: '', atas_nama: '' })
   const [ownerPassForm, setOwnerPassForm] = useState({ password_lama: '', password_baru: '', konfirmasi: '' })
   const [exportDari, setExportDari] = useState(new Date(Date.now()-30*24*60*60*1000).toISOString().split('T')[0])
   const [exportSampai, setExportSampai] = useState(new Date().toISOString().split('T')[0])
@@ -632,7 +632,7 @@ export default function Admin() {
                     {s.role === 'owner' && s.id === user?.id && (
                       <button onClick={() => {
                         setModalEditOwner(true)
-                        setOwnerForm({ nama_lengkap: s.nama_lengkap||'', no_telepon: s.no_telepon||'', email: s.email||'', bank: s.bank||'', no_rekening: s.no_rekening||'', atas_nama: s.atas_nama||'' })
+                        setOwnerForm({ username: s.username||'', nama_lengkap: s.nama_lengkap||'', no_telepon: s.no_telepon||'', email: s.email||'', bank: s.bank||'', no_rekening: s.no_rekening||'', atas_nama: s.atas_nama||'' })
                         setOwnerPassForm({ password_lama: '', password_baru: '', konfirmasi: '' })
                       }} style={{ padding: '4px 10px', fontSize: 10, background: 'rgba(255,215,0,0.1)', border: '1px solid var(--gold)', color: 'var(--gold)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>
                         ✏️ Edit
@@ -772,7 +772,21 @@ export default function Admin() {
       {modalStaff && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
           <div className='card' style={{ width: '100%', maxWidth: 380 }}>
-            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 16, color: 'var(--purple)' }}>✏️ Ubah Role — {modalStaff.username}</div>
+            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 16, color: 'var(--purple)' }}>✏️ Edit Staff — {modalStaff.username}</div>
+            <div style={{ marginBottom: 14 }}>
+              <label style={labelStyle}>Ubah Username</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input style={{ ...inputStyle, flex: 1 }} placeholder={modalStaff.username}
+                  id='staff-username-input' defaultValue={modalStaff.username} />
+                <button style={{ padding: '8px 14px', fontSize: 12, background: 'rgba(0,200,255,0.1)', border: '1px solid var(--blue)', color: 'var(--blue)', borderRadius: 6, cursor: 'pointer', fontWeight: 700, flexShrink: 0 }}
+                  onClick={async () => {
+                    const input = document.getElementById('staff-username-input') as HTMLInputElement
+                    const res = await apiCall('/admin/staff', { method: 'POST', body: JSON.stringify({ aksi: 'ubah_username', user_id: modalStaff.id, username_baru: input.value }) })
+                    if (res.status === 0) toast.error(res.error)
+                    else { toast.success('Username diubah!'); muatStaff(); setModalStaff(null) }
+                  }}>Ubah</button>
+              </div>
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[
                 { role: 'admin', label: '🛡️ Admin', desc: 'Kelola deposit, withdraw, users, chat', color: 'var(--blue)' },
@@ -837,6 +851,10 @@ export default function Admin() {
             <div style={{ marginBottom: 20 }}>
               <div style={{ fontSize: 12, color: 'var(--blue)', fontWeight: 700, marginBottom: 12 }}>📋 Informasi Profil</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div><label style={labelStyle}>Username</label>
+                  <input style={inputStyle} placeholder='Username' value={ownerForm.username}
+                    onChange={e => setOwnerForm((f: any) => ({ ...f, username: e.target.value }))} />
+                </div>
                 <div><label style={labelStyle}>Email</label>
                   <input style={inputStyle} type='email' placeholder='email@owner.com' value={ownerForm.email}
                     onChange={e => setOwnerForm((f: any) => ({ ...f, email: e.target.value }))} />
@@ -851,6 +869,12 @@ export default function Admin() {
                 </div>
                 <button className='btn btn-primary' style={{ width: '100%', padding: 10 }}
                   onClick={async () => {
+                    // Ubah username jika berubah
+                    const currentUser = staffList.find((s: any) => s.role === 'owner' && s.id === user?.id)
+                    if (ownerForm.username && ownerForm.username !== currentUser?.username) {
+                      const resUser = await apiCall('/admin/staff', { method: 'POST', body: JSON.stringify({ aksi: 'ubah_username', user_id: user?.id, username_baru: ownerForm.username }) })
+                      if (resUser.status === 0) { toast.error(resUser.error); return }
+                    }
                     const res = await apiCall('/admin/staff', { method: 'POST', body: JSON.stringify({ aksi: 'edit_owner', ...ownerForm }) })
                     if (res.status === 0) toast.error(res.error)
                     else { toast.success('Profil diupdate!'); muatStaff() }

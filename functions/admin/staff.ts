@@ -83,6 +83,24 @@ export async function onRequestPost({ request, env }) {
   }
 
   // Owner edit profil diri sendiri
+  if (aksi === 'ubah_username') {
+    if (!user_id || !body.username_baru) return err('user_id dan username_baru diperlukan');
+    const usernameBaru = body.username_baru.toLowerCase().trim();
+    if (usernameBaru.length < 4) return err('Username minimal 4 karakter');
+    if (!/^[a-zA-Z0-9_]+$/.test(usernameBaru)) return err('Username hanya boleh huruf, angka, underscore');
+
+    const { data: targetUser } = await sb.from('users').select('username, role').eq('id', user_id).single();
+    if (!targetUser) return err('User tidak ditemukan');
+
+    // Cek username sudah dipakai
+    const { data: exist } = await sb.from('users').select('id').eq('username', usernameBaru).neq('id', user_id).maybeSingle();
+    if (exist) return err('Username sudah digunakan');
+
+    await sb.from('users').update({ username: usernameBaru }).eq('id', user_id);
+    await logAdmin(env, auth, 'ubah_username', user_id, 'staff', { username_lama: targetUser.username, username_baru: usernameBaru }, ip);
+    return ok({ pesan: 'Username berhasil diubah', username_baru: usernameBaru });
+  }
+
   if (aksi === 'edit_owner') {
     const { nama_lengkap, no_telepon, bank, no_rekening, atas_nama, email } = body;
     await sb.from('users').update({
