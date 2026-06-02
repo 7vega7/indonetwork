@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { authApi } from '../lib/api'
 import toast from 'react-hot-toast'
@@ -7,8 +7,7 @@ import toast from 'react-hot-toast'
 export default function Register() {
   const { login, isLoggedIn } = useAuth()
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const refCode = searchParams.get('ref') || ''
+  const refCode = new URLSearchParams(window.location.search).get('ref') || ''
   const [form, setForm] = useState({ username: '', email: '', password: '', konfirmasi: '', referral: '' })
   const [loading, setLoading] = useState(false)
   const [tsToken, setTsToken] = useState('')
