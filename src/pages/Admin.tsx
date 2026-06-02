@@ -223,7 +223,7 @@ export default function Admin() {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 20, overflowX: 'auto', scrollbarWidth: 'none' }}>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 20, overflowX: 'auto', scrollbarWidth: 'thin', paddingBottom: 4 }}>
         {TAB.map(t => (
           <button key={t.kode} onClick={() => { setTab(t.kode); setStatusFilter('pending') }}
             style={{ padding: isMobile ? '7px 10px' : '8px 16px', borderRadius: 6, cursor: 'pointer', fontWeight: 700, fontSize: isMobile ? 11 : 12, whiteSpace: 'nowrap', flexShrink: 0, background: tab === t.kode ? 'linear-gradient(135deg,#ffd700,#ff9500)' : 'var(--bg2)', border: `1px solid ${tab === t.kode ? 'var(--gold)' : 'var(--border)'}`, color: tab === t.kode ? '#000' : 'var(--muted)' }}>
