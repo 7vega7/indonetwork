@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
-import { useNavigate } from 'react-router-dom'
-import { useNavigate } from 'react-router-dom'
 import { adminApi } from '../lib/api'
 import toast from 'react-hot-toast'
 import AdminChatEmbed from '../components/AdminChatEmbed'
@@ -22,11 +20,7 @@ const TAB_ALL = [
   { kode: 'export', label: '📥 Export' },
 ]
 
-const TAB = user?.role === 'cs'
-  ? TAB_ALL.filter(t => t.kode === 'chat')
-  : user?.role === 'admin'
-  ? TAB_ALL.filter(t => !['providers','banner','promosi','settings','logs','export'].includes(t.kode))
-  : TAB_ALL
+
 
 const STATUS_COLOR: Record<string, string> = {
   pending: 'var(--gold)', success: '#00e676', sukses: '#00e676',
@@ -63,6 +57,11 @@ const PROMOSI_KOSONG = {
 
 export default function Admin() {
   const { user, logout } = useAuth()
+  const TAB = user?.role === 'cs'
+    ? TAB_ALL.filter(t => t.kode === 'chat')
+    : user?.role === 'admin'
+    ? TAB_ALL.filter(t => !['providers','banner','promosi','settings','logs','export'].includes(t.kode))
+    : TAB_ALL
   const navigateOut = useNavigate()
   const navigate = useNavigate()
   const [tab, setTab] = useState('dashboard')
