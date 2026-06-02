@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ok, err, getAuth, getSupabase, hashPassword, logAdmin, nexus } from '../_utils';
+import { ok, err, getAuth, getSupabase, hashPassword, verifyPassword, logAdmin, nexus } from '../_utils';
 
 export async function onRequestGet({ request, env }) {
   const auth = await getAuth(request, env);
@@ -103,7 +103,6 @@ export async function onRequestPost({ request, env }) {
     if (pass_baru.length < 6) return err('Password minimal 6 karakter');
 
     const { data: ownerData } = await sb.from('users').select('password_hash').eq('id', auth.sub).single();
-    const { verifyPassword } = await import('../_utils');
     const valid = await verifyPassword(password_lama, ownerData.password_hash);
     if (!valid) return err('Password lama tidak sesuai');
 
