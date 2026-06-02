@@ -30,14 +30,14 @@ export default function Promosi() {
   useEffect(() => {
     if (slug) {
       // Load detail promosi
-      fetch(`/promosi?slug=${slug}`)
+      fetch(`/api/promosi?slug=${slug}`)
         .then(r => r.json())
         .then(res => { if (res.promosi) setDetail(res.promosi) })
         .catch(() => {})
         .finally(() => setLoading(false))
     } else {
       // Load list promosi
-      fetch('/promosi')
+      fetch('/api/promosi')
         .then(r => r.json())
         .then(res => setPromosiList(res.promosi || []))
         .catch(() => {})
@@ -63,7 +63,7 @@ export default function Promosi() {
   // Halaman detail promosi
   if (slug && detail) return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: isMobile ? '12px 10px 80px' : '24px 20px' }}>
-      <button onClick={() => navigate('/promosi')}
+      <button onClick={() => navigate('/api/promosi')}
         style={{ background: 'none', border: 'none', color: 'var(--blue)', cursor: 'pointer', fontSize: 13, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
         ← Kembali ke Promosi
       </button>
