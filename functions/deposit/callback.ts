@@ -60,6 +60,19 @@ export async function onRequestPost({ request, env }) {
     status: 'success',
   })
 
+  // Notif telegram sukses
+  const nama = deposit.users.username
+  const jumlah = deposit.amount.toLocaleString('id-ID')
+  const metode = deposit.method
+  await sendTelegram(env,
+    `💰 <b>DEPOSIT SUKSES</b>\n\n` +
+    `👤 User: <b>${nama}</b>\n` +
+    `💵 Jumlah: <b>Rp ${jumlah}</b>\n` +
+    `💳 Metode: ${metode}\n` +
+    `✅ Status: Dikonfirmasi Otomatis\n` +
+    `🕐 ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB`
+  )
+
   return new Response('SUCCESS', { status: 200 })
 }
 

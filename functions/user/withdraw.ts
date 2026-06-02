@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { sendTelegram } from '../_telegram';
 import { ok, err, getAuth, getSupabase, nexus } from '../_utils';
 
 export async function onRequestGet({ request, env }) {

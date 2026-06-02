@@ -271,7 +271,7 @@ export default function Admin() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <button className="btn btn-primary" onClick={() => setTab('deposit')} style={{ width: '100%' }}>💰 Deposit Pending ({stats?.deposit_pending || 0})</button>
                 <button className="btn btn-primary" onClick={() => setTab('withdraw')} style={{ width: '100%', background: 'linear-gradient(135deg,#ff9500,#ff2d78)' }}>💸 Withdraw Pending ({stats?.withdraw_pending || 0})</button>
-                <button className="btn btn-outline" onClick={handleSyncUsers} style={{ width: '100%' }}>🔄 Sync Users ke NexusGGR</button>
+
               </div>
             </div>
             <div className="card">
@@ -523,6 +523,7 @@ export default function Admin() {
                 { judul: '💰 Transaksi', prefix: 'deposit_timeout_menit' },
                 { judul: '🎁 Bonus Register', prefix: 'register_bonus_' },
                 { judul: '🎁 Freebet', prefix: 'freebet_' },
+                { judul: '📱 Telegram', prefix: 'telegram_' },
                 { judul: '💳 JayaPay', prefix: 'jayapay_' },
               ].map(group => {
                 const items = settingsList.filter(s => s.kunci.startsWith(group.prefix))
@@ -570,6 +571,22 @@ export default function Admin() {
                 }}>
                 💾 Simpan Semua Settings
               </button>
+
+              {/* Test Telegram */}
+              <div className='card' style={{ borderColor: 'rgba(0,200,255,0.3)' }}>
+                <div style={{ fontWeight: 700, marginBottom: 10, color: 'var(--blue)' }}>📱 Test Notifikasi Telegram</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 12 }}>
+                  Pastikan Bot Token dan Chat ID sudah diisi dan disimpan sebelum test.
+                </div>
+                <button className='btn btn-primary' style={{ width: '100%' }}
+                  onClick={async () => {
+                    const res = await apiCall('/admin/telegram-test', { method: 'POST' })
+                    if (res.status === 0) toast.error(res.error)
+                    else toast.success(res.pesan)
+                  }}>
+                  📤 Kirim Pesan Test ke Telegram
+                </button>
+              </div>
 
               <div className='card' style={{ borderColor: 'rgba(255,45,120,0.3)' }}>
                 <div style={{ fontWeight: 700, marginBottom: 10, color: 'var(--pink)' }}>🔧 Tools</div>

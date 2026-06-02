@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { sendTelegram } from '../_telegram';
 import { ok, err, getAuth, getSupabase } from '../_utils';
 import { getSettings } from '../_settings';
 import { createOrder } from '../_jayapay';
@@ -104,6 +105,14 @@ export async function onRequestPost({ request, env }) {
     expired_at: expiredAt.toISOString(),
   }).select().single()
 
+  await sendTelegram(env,
+    \`⏳ <b>DEPOSIT PENDING</b>\n\n\` +
+    \`👤 User: <b>\${auth.username}</b>\n\` +
+    \`💵 Jumlah: <b>Rp \${jumlah.toLocaleString('id-ID')}</b>\n\` +
+    \`💳 Metode: \${metode}\n\` +
+    \`📋 Ref: \${orderNum}\n\` +
+    \`🕐 \${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB\`
+  )
   return ok({
     pesan: 'Permintaan deposit berhasil dibuat. Menunggu konfirmasi admin.',
     deposit_id: deposit.id,
