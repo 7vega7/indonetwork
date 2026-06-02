@@ -32,7 +32,7 @@ export default function Register() {
         clearInterval(t)
         window.turnstile.render(tsRef.current, {
           sitekey: '0x4AAAAAADYmCs4M4HZbuWER',
-          callback: (token: string) => setTsToken(token),
+          callback: (token: string) => { console.log('Turnstile token received:', token.substring(0,20)); setTsToken(token) },
           'expired-callback': () => setTsToken(''),
           theme: 'dark', size: 'normal',
         })
