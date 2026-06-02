@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { json, getSupabase } from './_utils';
+import { json, getSupabase } from '../_utils';
 
 export async function onRequestGet({ request, env }) {
   const sb = getSupabase(env);
