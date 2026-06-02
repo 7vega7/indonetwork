@@ -27,17 +27,16 @@ export default function Register() {
 
   useEffect(() => {
     const t = setInterval(() => {
-      const el = document.getElementById('ts-register')
-      if (!el || tsRendered.current) return
-      if (!window.turnstile) return
-      clearInterval(t)
-      tsRendered.current = true
-      window.turnstile.render(el, {
-        sitekey: '0x4AAAAAAABkMYinukE8nsd9',
-        callback: (token: string) => setTsToken(token),
-        'expired-callback': () => setTsToken(''),
-        theme: 'dark', size: 'normal',
-      })
+      if (window.turnstile && tsRef.current && !tsRendered.current) {
+        tsRendered.current = true
+        clearInterval(t)
+        window.turnstile.render(tsRef.current, {
+          sitekey: '0x4AAAAAADYmCs4M4HZbuWER',
+          callback: (token: string) => setTsToken(token),
+          'expired-callback': () => setTsToken(''),
+          theme: 'dark', size: 'normal',
+        })
+      }
     }, 100)
     return () => clearInterval(t)
   }, [])
@@ -177,7 +176,7 @@ export default function Register() {
           </div>
 
           {/* Turnstile */}
-          <div id="ts-register" style={{ minHeight: 65, borderRadius: 6, overflow: 'hidden', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
+          <div ref={tsRef} style={{ borderRadius: 6, overflow: 'hidden' }} />
 
           <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%', padding: 13, fontSize: 14, marginTop: 4 }}>
             {loading ? 'Mendaftar...' : '🚀 Daftar Sekarang'}
