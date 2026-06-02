@@ -27,20 +27,35 @@ export default function Register() {
 
   useEffect(() => {
     if (tsRendered.current) return
-    const render = () => {
-      if (!tsRef.current || !window.turnstile) return
+
+    const renderWidget = () => {
+      if (!tsRef.current || tsRendered.current) return
       tsRendered.current = true
       window.turnstile.render(tsRef.current, {
         sitekey: '0x4AAAAAAABkMYinukE8nsd9',
         callback: (token: string) => setTsToken(token),
-        'expired-callback': () => setTsToken(''),
+        'expired-callback': () => { setTsToken(''); tsRendered.current = false },
         theme: 'dark', size: 'normal',
       })
     }
-    if (window.turnstile) render()
-    else {
-      const t = setInterval(() => { if (window.turnstile) { render(); clearInterval(t) } }, 200)
-      return () => clearInterval(t)
+
+    if (window.turnstile) {
+      renderWidget()
+    } else {
+      // Load script jika belum ada
+      if (!document.querySelector('script[src*="turnstile"]')) {
+        const script = document.createElement('script')
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
+        script.async = true
+        script.defer = true
+        script.onload = renderWidget
+        document.head.appendChild(script)
+      } else {
+        const t = setInterval(() => {
+          if (window.turnstile) { renderWidget(); clearInterval(t) }
+        }, 100)
+        return () => clearInterval(t)
+      }
     }
   }, [])
 
