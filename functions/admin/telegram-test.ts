@@ -1,7 +1,6 @@
 // @ts-nocheck
 import { ok, err, getAuth } from '../_utils';
 import { getSettings } from '../_settings';
-import { getSettings } from '../_settings';
 
 export async function onRequestPost({ request, env }) {
   const auth = await getAuth(request, env);
@@ -10,15 +9,13 @@ export async function onRequestPost({ request, env }) {
   const settings = await getSettings(env);
   const token = settings['telegram_bot_token'];
   const chatId = settings['telegram_chat_id'];
+  const brandNama = settings['brand_nama'] || 'Website';
 
   if (!token) return err('Token bot belum diisi');
   if (!chatId) return err('Chat ID belum diisi');
 
-  const settings = await getSettings(env)
-  const brandNama = settings['brand_nama'] || 'Website'
-
   try {
-    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    const res = await fetch('https://api.telegram.org/bot' + token + '/sendMessage', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
