@@ -35,7 +35,7 @@ interface BrandStore {
 }
 
 export const useBrand = create<BrandStore>((set) => ({
-  nama: 'INDONETWORK',
+  nama: '',
   tagline: 'CASINO',
   logo_url: '',
   warna_utama: '#00c8ff',

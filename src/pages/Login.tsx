@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useBrand } from '../hooks/useBrand'
 import { authApi } from '../lib/api'
 import toast from 'react-hot-toast'
 
@@ -9,6 +10,7 @@ declare global {
 }
 
 export default function Login() {
+  const { nama: brandNama } = useBrand()
   const { login, isLoggedIn } = useAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState({ username: '', password: '' })
@@ -54,7 +56,7 @@ export default function Login() {
     <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
       <div className="card fade-in" style={{ width: '100%', maxWidth: 420 }}>
         <h1 style={{ fontFamily: 'var(--display)', fontSize: 20, fontWeight: 900, textAlign: 'center', marginBottom: 8, background: 'linear-gradient(135deg,#00c8ff,#7b2fff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>MASUK</h1>
-        <p style={{ textAlign: 'center', color: 'var(--muted)', fontSize: 13, marginBottom: 24 }}>Masuk ke akun INDONETWORK kamu</p>
+        <p style={{ textAlign: 'center', color: 'var(--muted)', fontSize: 13, marginBottom: 24 }}>Masuk ke akun {brandNama} kamu</p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div>

@@ -7,7 +7,7 @@ import Aktivitas from '../components/Aktivitas'
 import toast from 'react-hot-toast'
 
 const SLIDES = [
-  { tag: '🔥 Event Terbatas', judul: 'BONUS DEPOSIT\n100%', sub: 'Untuk semua member baru INDONETWORK', warna: 'linear-gradient(135deg,#0a0a30,#1a0040,#300020)', aksi: 'KLAIM SEKARANG' },
+  { tag: '🔥 Event Terbatas', judul: 'BONUS DEPOSIT\n100%', sub: 'Untuk semua member baru', warna: 'linear-gradient(135deg,#0a0a30,#1a0040,#300020)', aksi: 'KLAIM SEKARANG' },
   { tag: '💎 New Member', judul: 'FREEBET\nIDR 50.000', sub: 'Daftar sekarang & langsung main tanpa deposit', warna: 'linear-gradient(135deg,#001a30,#003050,#001060)', aksi: 'DAFTAR GRATIS' },
   { tag: '⚡ Deposit Kilat', judul: 'QRIS INSTAN\n30 DETIK', sub: 'Deposit via QRIS, GoPay, OVO, Dana & Bank', warna: 'linear-gradient(135deg,#1a1000,#302000,#200010)', aksi: 'DEPOSIT SEKARANG' },
 ]
@@ -41,6 +41,7 @@ const PROVIDER_LIST = [
 export default function Beranda() {
   const { isLoggedIn } = useAuth()
   const brand = useBrand()
+  const brandNama = brand.nama
   const navigate = useNavigate()
   const [slide, setSlide] = useState(0)
   const [hotGames, setHotGames] = useState<any[]>([])
