@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { ok, err, getAuth } from '../_utils';
 import { getSettings } from '../_settings';
+import { getSettings } from '../_settings';
 
 export async function onRequestPost({ request, env }) {
   const auth = await getAuth(request, env);
@@ -13,13 +14,16 @@ export async function onRequestPost({ request, env }) {
   if (!token) return err('Token bot belum diisi');
   if (!chatId) return err('Chat ID belum diisi');
 
+  const settings = await getSettings(env)
+  const brandNama = settings['brand_nama'] || 'Website'
+
   try {
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         chat_id: chatId,
-        text: `✅ <b>Test Notifikasi Berhasil!</b>\n\n🎰 <b>INDONETWORK</b>\nBot Telegram sudah terhubung dengan dashboard admin.\n\n🕐 ${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB`,
+        text: '✅ <b>Test Notifikasi Berhasil!</b>\n\n🎰 <b>' + brandNama + '</b>\nBot Telegram sudah terhubung dengan dashboard admin.\n\n🕐 ' + new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) + ' WIB',
         parse_mode: 'HTML',
       }),
     });
