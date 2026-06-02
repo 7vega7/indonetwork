@@ -43,6 +43,7 @@ export default function Game() {
   const navigate = useNavigate()
   const location = useLocation()
   const { isLoggedIn, syncSaldo } = useAuth()
+  const { nama: brandNama } = useBrand()
 
   const providerAktif = providerParam?.toUpperCase() || 'PRAGMATIC'
   const tipeAktif = PROVIDERS.find(p => p.kode === providerAktif)?.tipe || 'slot'
