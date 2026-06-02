@@ -27,6 +27,17 @@ export async function onRequestPost({ request, env }) {
   const { data: existEmail } = await sb.from('users').select('id').eq('email', email.toLowerCase()).maybeSingle();
   if (existEmail) return err('Email sudah terdaftar');
 
+  // Validasi duplikat no_whatsapp dan no_rekening
+  if (no_whatsapp) {
+    const { data: existWa } = await sb.from('users').select('id').eq('no_whatsapp', no_whatsapp).maybeSingle();
+    if (existWa) return err('No. WhatsApp sudah terdaftar');
+  }
+
+  if (no_rekening) {
+    const { data: existRek } = await sb.from('users').select('id').eq('no_rekening', no_rekening).maybeSingle();
+    if (existRek) return err('No. rekening sudah terdaftar');
+  }
+
   const passwordHash = await hashPassword(password);
   const kodeReferral = username.substring(0, 3).toUpperCase() + Math.random().toString(36).substring(2, 7).toUpperCase();
 
