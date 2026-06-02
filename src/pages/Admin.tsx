@@ -387,6 +387,7 @@ export default function Admin() {
                       <div>
                         <div style={{ fontWeight: 700, fontSize: 13 }}>{u.username} {u.role === 'owner' && <span style={{ fontSize: 10, color: 'var(--gold)' }}>👑</span>}{u.role === 'admin' && <span style={{ fontSize: 10, color: 'var(--blue)' }}>🛡️</span>}{u.role === 'cs' && <span style={{ fontSize: 10, color: 'var(--purple)' }}>🎧</span>}{u.ban_reason && <span style={{ fontSize: 10, color: 'var(--pink)' }}> [BANNED]</span>}</div>
                         <div style={{ fontSize: 11, color: 'var(--muted)' }}>{u.email}</div>
+                        <div style={{ fontSize: 11, color: 'var(--muted)' }}>{u.no_whatsapp || u.no_telepon ? '📱 ' + (u.no_whatsapp || u.no_telepon) : ''} {u.bank ? '🏦 ' + u.bank : ''}</div>
                         <div style={{ fontSize: 10, color: u.is_active ? '#00e676' : 'var(--pink)' }}>{u.is_active ? '● Aktif' : '● Nonaktif'}</div>
                       </div>
                     </div>
@@ -395,7 +396,7 @@ export default function Admin() {
                       <div style={{ display: 'flex', gap: 4, marginTop: 6, justifyContent: 'flex-end' }}>
                         <button onClick={() => setModalUser(u)} style={{ padding: '4px 8px', fontSize: 10, background: 'rgba(0,230,118,0.1)', border: '1px solid #00e676', color: '#00e676', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>+ Saldo</button>
                         <button onClick={() => { setModalKurangSaldo(u); setKurangSaldoJumlah('') }} style={{ padding: '4px 8px', fontSize: 10, background: 'rgba(255,45,120,0.1)', border: '1px solid var(--pink)', color: 'var(--pink)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>- Saldo</button>
-                        <button onClick={() => { setModalEditUser(u); setEditUserForm({ nama_lengkap: u.nama_lengkap||'', no_telepon: u.no_telepon||'', bank: u.bank||'', no_rekening: u.no_rekening||'', atas_nama: u.atas_nama||'' }) }} style={{ padding: '4px 8px', fontSize: 10, background: 'rgba(0,200,255,0.1)', border: '1px solid var(--blue)', color: 'var(--blue)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>✏️</button>
+                        <button onClick={() => { setModalEditUser(u); setEditUserForm({ nama_lengkap: u.nama_lengkap||'', no_whatsapp: u.no_whatsapp||u.no_telepon||'', bank: u.bank||'', no_rekening: u.no_rekening||'', atas_nama: u.atas_nama||'' }) }} style={{ padding: '4px 8px', fontSize: 10, background: 'rgba(0,200,255,0.1)', border: '1px solid var(--blue)', color: 'var(--blue)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>✏️</button>
                         <button onClick={() => { setModalResetPass(u); setResetPassBaru('') }} style={{ padding: '4px 8px', fontSize: 10, background: 'rgba(255,215,0,0.1)', border: '1px solid var(--gold)', color: 'var(--gold)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>🔑</button>
                         <button onClick={() => { setModalBan(u); setBanReason('') }} style={{ padding: '4px 8px', fontSize: 10, background: 'rgba(255,100,0,0.1)', border: '1px solid #ff6400', color: '#ff6400', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>🚫</button>
                         {u.role !== 'admin' && (
@@ -1012,8 +1013,8 @@ export default function Admin() {
               <div><label style={labelStyle}>Nama Lengkap</label>
                 <input style={inputStyle} value={editUserForm.nama_lengkap} onChange={e => setEditUserForm((f: any) => ({ ...f, nama_lengkap: e.target.value }))} placeholder='Nama lengkap' />
               </div>
-              <div><label style={labelStyle}>No. Telepon</label>
-                <input style={inputStyle} value={editUserForm.no_telepon} onChange={e => setEditUserForm((f: any) => ({ ...f, no_telepon: e.target.value }))} placeholder='08xxx' />
+              <div><label style={labelStyle}>No. WhatsApp</label>
+                <input style={inputStyle} value={editUserForm.no_whatsapp||''} onChange={e => setEditUserForm((f: any) => ({ ...f, no_whatsapp: e.target.value }))} placeholder='08xxx' />
               </div>
               <div><label style={labelStyle}>Bank</label>
                 <select style={{ ...inputStyle, cursor: 'pointer' }} value={editUserForm.bank} onChange={e => setEditUserForm((f: any) => ({ ...f, bank: e.target.value }))}>

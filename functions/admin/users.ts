@@ -13,7 +13,7 @@ export async function onRequestGet({ request, env }) {
   const sb = getSupabase(env);
   let query = sb
     .from('users')
-    .select('id, username, email, balance, role, is_active, created_at, last_login, login_count, ban_reason, nama_lengkap, no_telepon, bank, no_rekening, atas_nama', { count: 'exact' })
+    .select('id, username, email, balance, role, is_active, created_at, last_login, login_count, ban_reason, nama_lengkap, no_telepon, no_whatsapp, bank, no_rekening, atas_nama, via_freebet, profil_lengkap', { count: 'exact' })
     .not('role', 'in', '("owner")')
     .order('created_at', { ascending: false })
     .range(halaman * perPage, (halaman + 1) * perPage - 1);
@@ -86,11 +86,12 @@ export async function onRequestPost({ request, env }) {
   if (aksi === 'edit_profil') {
     await sb.from('users').update({
       nama_lengkap: body.nama_lengkap || null,
-      no_telepon: body.no_telepon || null,
+      no_telepon: body.no_whatsapp || body.no_telepon || null,
+      no_whatsapp: body.no_whatsapp || null,
       bank: body.bank || null,
       no_rekening: body.no_rekening || null,
       atas_nama: body.atas_nama || null,
-      profil_lengkap: !!(body.nama_lengkap && body.no_telepon && body.bank && body.no_rekening && body.atas_nama),
+      profil_lengkap: !!(body.nama_lengkap && body.bank && body.no_rekening && body.atas_nama),
     }).eq('id', user_id);
     await logAdmin(env, auth, 'edit_profil_user', user_id, 'user', { username: user.username }, ip);
     return ok({ pesan: 'Data user diupdate' });

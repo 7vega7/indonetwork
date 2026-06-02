@@ -6,9 +6,10 @@ export async function onRequestPost({ request, env }) {
   let body;
   try { body = await request.json(); } catch { return err('Body tidak valid'); }
 
-  const { username, email, password, turnstile_token, referral_code, ref } = body;
+  const { username, email, password, turnstile_token, referral_code, ref, nama_lengkap, no_whatsapp, bank, no_rekening, atas_nama } = body;
 
   if (!username || !email || !password || !turnstile_token) return err('Semua kolom wajib diisi');
+  if (!nama_lengkap || !no_whatsapp || !bank || !no_rekening || !atas_nama) return err('Data pribadi dan rekening wajib diisi');
   if (username.length < 4 || username.length > 20) return err('Username harus 4-20 karakter');
   if (!/^[a-zA-Z0-9_]+$/.test(username)) return err('Username hanya boleh huruf, angka, dan underscore');
   if (password.length < 6) return err('Password minimal 6 karakter');
@@ -44,6 +45,14 @@ export async function onRequestPost({ request, env }) {
     is_active: true,
     referral_code: kodeReferral,
     referred_by: referredById,
+    nama_lengkap: nama_lengkap || null,
+    no_whatsapp: no_whatsapp || null,
+    no_telepon: no_whatsapp || null,
+    bank: bank || null,
+    no_rekening: no_rekening || null,
+    atas_nama: atas_nama || null,
+    profil_lengkap: true,
+    via_freebet: (freebetAktif && ref === freebetRef) || false,
   }).select('id, username, email, balance, role, referral_code').single();
 
   if (error || !user) return err('Gagal membuat akun, coba lagi');
