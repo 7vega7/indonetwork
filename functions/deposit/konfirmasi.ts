@@ -3,7 +3,7 @@ import { ok, err, getAuth, getSupabase, nexus } from '../_utils';
 
 export async function onRequestPost({ request, env }) {
   const auth = await getAuth(request, env);
-  if (!auth || auth.role !== 'admin') return err('Akses admin diperlukan', 403);
+  if (!auth || !['admin','owner'].includes(auth.role)) return err('Akses admin diperlukan', 403);
 
   let body;
   try { body = await request.json(); } catch { return err('Body tidak valid'); }
