@@ -8,7 +8,7 @@ export async function onRequestGet({ request, env }) {
   const sb = getSupabase(env);
   const { data } = await sb
     .from('users')
-    .select('id, username, email, role, is_active, created_at, last_login')
+    .select('id, username, email, role, is_active, created_at, last_login, nama_lengkap, no_telepon, bank, no_rekening, atas_nama')
     .in('role', ['admin', 'cs', 'owner'])
     .order('created_at', { ascending: false });
 

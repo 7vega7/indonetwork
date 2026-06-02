@@ -88,6 +88,9 @@ export default function Admin() {
   const [staffForm, setStaffForm] = useState({ username: '', email: '', password: '', role: 'admin' })
   const [modalStaffResetPass, setModalStaffResetPass] = useState<any>(null)
   const [staffResetPass, setStaffResetPass] = useState('')
+  const [modalEditOwner, setModalEditOwner] = useState(false)
+  const [ownerForm, setOwnerForm] = useState({ nama_lengkap: '', no_telepon: '', email: '', bank: '', no_rekening: '', atas_nama: '' })
+  const [ownerPassForm, setOwnerPassForm] = useState({ password_lama: '', password_baru: '', konfirmasi: '' })
   const [exportDari, setExportDari] = useState(new Date(Date.now()-30*24*60*60*1000).toISOString().split('T')[0])
   const [exportSampai, setExportSampai] = useState(new Date().toISOString().split('T')[0])
   const [settingsList, setSettingsList] = useState<any[]>([])
@@ -626,6 +629,15 @@ export default function Admin() {
                       <div style={{ fontSize: 11, color: 'var(--muted)' }}>{s.email}</div>
                       <div style={{ fontSize: 10, color: s.is_active ? '#00e676' : 'var(--pink)' }}>{s.is_active ? '● Aktif' : '● Nonaktif'}</div>
                     </div>
+                    {s.role === 'owner' && s.id === user?.id && (
+                      <button onClick={() => {
+                        setModalEditOwner(true)
+                        setOwnerForm({ nama_lengkap: s.nama_lengkap||'', no_telepon: s.no_telepon||'', email: s.email||'', bank: s.bank||'', no_rekening: s.no_rekening||'', atas_nama: s.atas_nama||'' })
+                        setOwnerPassForm({ password_lama: '', password_baru: '', konfirmasi: '' })
+                      }} style={{ padding: '4px 10px', fontSize: 10, background: 'rgba(255,215,0,0.1)', border: '1px solid var(--gold)', color: 'var(--gold)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>
+                        ✏️ Edit
+                      </button>
+                    )}
                     {s.role !== 'owner' && (
                       <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                         <button onClick={() => { setModalStaffResetPass(s); setStaffResetPass('') }}
@@ -810,6 +822,73 @@ export default function Admin() {
                 <button className='btn btn-outline' onClick={() => setModalStaffResetPass(null)} style={{ flex: 1 }}>Batal</button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+
+      {/* Modal Edit Owner */}
+      {modalEditOwner && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, overflowY: 'auto' }}>
+          <div className='card' style={{ width: '100%', maxWidth: 460, margin: 'auto' }}>
+            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 20, color: 'var(--gold)' }}>👑 Edit Profil Owner</div>
+
+            {/* Edit Info */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontSize: 12, color: 'var(--blue)', fontWeight: 700, marginBottom: 12 }}>📋 Informasi Profil</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div><label style={labelStyle}>Email</label>
+                  <input style={inputStyle} type='email' placeholder='email@owner.com' value={ownerForm.email}
+                    onChange={e => setOwnerForm((f: any) => ({ ...f, email: e.target.value }))} />
+                </div>
+                <div><label style={labelStyle}>Nama Lengkap</label>
+                  <input style={inputStyle} placeholder='Nama lengkap' value={ownerForm.nama_lengkap}
+                    onChange={e => setOwnerForm((f: any) => ({ ...f, nama_lengkap: e.target.value }))} />
+                </div>
+                <div><label style={labelStyle}>No. Telepon</label>
+                  <input style={inputStyle} placeholder='08xxx' value={ownerForm.no_telepon}
+                    onChange={e => setOwnerForm((f: any) => ({ ...f, no_telepon: e.target.value }))} />
+                </div>
+                <button className='btn btn-primary' style={{ width: '100%', padding: 10 }}
+                  onClick={async () => {
+                    const res = await apiCall('/admin/staff', { method: 'POST', body: JSON.stringify({ aksi: 'edit_owner', ...ownerForm }) })
+                    if (res.status === 0) toast.error(res.error)
+                    else { toast.success('Profil diupdate!'); muatStaff() }
+                  }}>💾 Simpan Profil</button>
+              </div>
+            </div>
+
+            {/* Garis pemisah */}
+            <div style={{ borderTop: '1px solid var(--border)', marginBottom: 20 }} />
+
+            {/* Ubah Password */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontSize: 12, color: 'var(--pink)', fontWeight: 700, marginBottom: 12 }}>🔑 Ubah Password</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div><label style={labelStyle}>Password Lama</label>
+                  <input style={inputStyle} type='password' placeholder='Password saat ini' value={ownerPassForm.password_lama}
+                    onChange={e => setOwnerPassForm((f: any) => ({ ...f, password_lama: e.target.value }))} />
+                </div>
+                <div><label style={labelStyle}>Password Baru</label>
+                  <input style={inputStyle} type='password' placeholder='Min 6 karakter' value={ownerPassForm.password_baru}
+                    onChange={e => setOwnerPassForm((f: any) => ({ ...f, password_baru: e.target.value }))} />
+                </div>
+                <div><label style={labelStyle}>Konfirmasi Password Baru</label>
+                  <input style={inputStyle} type='password' placeholder='Ulangi password baru' value={ownerPassForm.konfirmasi}
+                    onChange={e => setOwnerPassForm((f: any) => ({ ...f, konfirmasi: e.target.value }))} />
+                </div>
+                <button className='btn btn-primary' style={{ width: '100%', padding: 10, background: 'linear-gradient(135deg,#ff2d78,#7b2fff)' }}
+                  onClick={async () => {
+                    if (ownerPassForm.password_baru !== ownerPassForm.konfirmasi) { toast.error('Konfirmasi password tidak cocok'); return }
+                    if (ownerPassForm.password_baru.length < 6) { toast.error('Password minimal 6 karakter'); return }
+                    const res = await apiCall('/admin/staff', { method: 'POST', body: JSON.stringify({ aksi: 'reset_password_owner', password_lama: ownerPassForm.password_lama, password_baru: ownerPassForm.password_baru }) })
+                    if (res.status === 0) toast.error(res.error)
+                    else { toast.success('Password berhasil diubah!'); setOwnerPassForm({ password_lama: '', password_baru: '', konfirmasi: '' }) }
+                  }}>🔑 Ubah Password</button>
+              </div>
+            </div>
+
+            <button className='btn btn-outline' onClick={() => setModalEditOwner(false)} style={{ width: '100%' }}>Tutup</button>
           </div>
         </div>
       )}
