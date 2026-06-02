@@ -1096,7 +1096,7 @@ export default function Admin() {
               <div><label style={labelStyle}>Bank</label>
                 <select style={{ ...inputStyle, cursor: 'pointer' }} value={editUserForm.bank} onChange={e => setEditUserForm((f: any) => ({ ...f, bank: e.target.value }))}>
                   <option value='' style={{ background: '#111130' }}>Pilih Bank</option>
-                  {['BCA','BRI','BNI','Mandiri','CIMB Niaga','Permata','Danamon','BTN','BSI','Jenius','SeaBank','GoPay','OVO','Dana'].map(b => (
+                  {["BCA", "BRI", "BNI", "Mandiri", "CIMB Niaga", "Permata", "Danamon", "BTN", "Maybank", "OCBC NISP", "Panin", "Mega", "Bukopin", "BII Maybank", "HSBC", "Citibank", "Standard Chartered", "DBS", "Commonwealth", "Bank Neo Commerce", "Bank Jago", "Allo Bank", "BSI (Bank Syariah Indonesia)", "Bank Muamalat", "BTPN Syariah", "Bank Mega Syariah", "Bank Bukopin Syariah", "Bank DKI", "Bank BJB", "Bank Jateng", "Bank Jatim", "Bank Sumut", "Bank Sumsel Babel", "Bank Riau Kepri", "Bank Nagari", "Bank Kalsel", "Bank Kaltimtara", "Bank Sulselbar", "Bank NTB Syariah", "Bank BPD Bali", "Bank Sulteng", "Bank Maluku Malut", "Bank Papua", "GoPay", "OVO", "Dana", "ShopeePay", "LinkAja", "Jenius", "SeaBank", "Blu by BCA Digital", "Motion Banking", "Netzme", "iSaku", "Sakuku"].map(b => (
                     <option key={b} value={b} style={{ background: '#111130' }}>{b}</option>
                   ))}
                 </select>

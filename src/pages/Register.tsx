@@ -4,7 +4,28 @@ import { useAuth } from '../hooks/useAuth'
 import { authApi } from '../lib/api'
 import toast from 'react-hot-toast'
 
-const BANK_LIST = ['BCA','BRI','BNI','Mandiri','CIMB Niaga','Permata','Danamon','BTN','BSI','Jenius','SeaBank','GoPay','OVO','Dana']
+const BANK_LIST = {
+  'Bank Umum': [
+    'BCA', 'BRI', 'BNI', 'Mandiri', 'CIMB Niaga', 'Permata', 'Danamon',
+    'BTN', 'Maybank', 'OCBC NISP', 'Panin', 'Mega', 'Bukopin', 'BII Maybank',
+    'HSBC', 'Citibank', 'Standard Chartered', 'DBS', 'Commonwealth',
+    'Bank Neo Commerce', 'Bank Jago', 'Allo Bank',
+  ],
+  'Bank Syariah': [
+    'BSI (Bank Syariah Indonesia)', 'Bank Muamalat', 'BTPN Syariah',
+    'Bank Mega Syariah', 'Bank Bukopin Syariah',
+  ],
+  'Bank Daerah': [
+    'Bank DKI', 'Bank BJB', 'Bank Jateng', 'Bank Jatim', 'Bank Sumut',
+    'Bank Sumsel Babel', 'Bank Riau Kepri', 'Bank Nagari', 'Bank Kalsel',
+    'Bank Kaltimtara', 'Bank Sulselbar', 'Bank NTB Syariah', 'Bank BPD Bali',
+    'Bank Sulteng', 'Bank Maluku Malut', 'Bank Papua',
+  ],
+  'E-Wallet & Digital': [
+    'GoPay', 'OVO', 'Dana', 'ShopeePay', 'LinkAja', 'Jenius', 'SeaBank',
+    'Blu by BCA Digital', 'Motion Banking', 'Netzme', 'iSaku', 'Sakuku',
+  ],
+}
 
 export default function Register() {
   const { login, isLoggedIn } = useAuth()
@@ -153,8 +174,14 @@ export default function Register() {
           <div>
             <label style={lbl}>Bank *</label>
             <select style={{ ...inp, cursor: 'pointer' }} value={form.bank} required onChange={e => setForm(f => ({ ...f, bank: e.target.value }))}>
-              <option value="" style={{ background: '#111130' }}>Pilih Bank</option>
-              {BANK_LIST.map(b => <option key={b} value={b} style={{ background: '#111130' }}>{b}</option>)}
+              <option value="" style={{ background: '#111130' }}>Pilih Bank / E-Wallet</option>
+              {Object.entries(BANK_LIST).map(([grup, banks]) => (
+                <optgroup key={grup} label={grup} style={{ background: '#111130', color: 'var(--gold)' }}>
+                  {(banks as string[]).map(b => (
+                    <option key={b} value={b} style={{ background: '#111130' }}>{b}</option>
+                  ))}
+                </optgroup>
+              ))}
             </select>
           </div>
 
