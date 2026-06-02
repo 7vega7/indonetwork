@@ -745,7 +745,7 @@ export default function Admin() {
               <div style={{ display: 'flex', gap: 8 }}>
                 <button className='btn btn-primary' style={{ flex: 1 }}
                   onClick={async () => {
-                    const res = await apiCall('/admin/staff', { method: 'POST', body: JSON.stringify({ aksi: 'tambah_staff', ...staffForm }) })
+                    const res = await apiCall('/admin/staff', { method: 'POST', body: JSON.stringify({ aksi: 'tambah_staff', username: staffForm.username, email: staffForm.email, password: staffForm.password, role_baru: staffForm.role }) })
                     if (res.status === 0) toast.error(res.error)
                     else { toast.success(res.pesan); setModalTambahStaff(false); muatStaff() }
                   }}>✅ Tambah</button>
