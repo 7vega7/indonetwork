@@ -7,6 +7,8 @@ import toast from 'react-hot-toast'
 export default function Register() {
   const { login, isLoggedIn } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const refCode = searchParams.get('ref') || ''
   const [form, setForm] = useState({ username: '', email: '', password: '', konfirmasi: '', referral: '' })
   const [loading, setLoading] = useState(false)
   const [tsToken, setTsToken] = useState('')
@@ -53,7 +55,7 @@ export default function Register() {
     if (usernameStatus === 'taken') { toast.error('Username sudah digunakan'); return }
     setLoading(true)
     try {
-      const res = await authApi.register({ username: form.username, email: form.email, password: form.password, turnstile_token: tsToken, referral_code: form.referral || undefined })
+      const res = await authApi.register({ username: form.username, email: form.email, password: form.password, turnstile_token: tsToken, referral_code: form.referral || undefined, ref: refCode })
       login(res.token, res.user)
       toast.success('Akun berhasil dibuat!')
       navigate('/')
