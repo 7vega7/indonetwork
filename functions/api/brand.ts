@@ -13,6 +13,7 @@ export async function onRequestGet({ request, env }) {
       'min_deposit', 'min_withdraw', 'max_withdraw',
       'popup_aktif', 'popup_judul', 'popup_pesan', 'popup_gambar_url',
       'popup_tombol_teks', 'popup_tombol_url', 'download_apk_url', 'freebet_nominal_display',
+      'popup_tipe', 'popup_warna', 'popup_ikon', 'popup_target', 'popup_frekuensi',
     ])
 
   const brand: Record<string, any> = {}

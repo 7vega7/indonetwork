@@ -550,11 +550,33 @@ export default function Admin() {
                               <option value='test' style={{ background: '#111130' }}>test</option>
                               <option value='live' style={{ background: '#111130' }}>live</option>
                             </select>
-                          ) : s.kunci === 'jayapay_aktif' || s.kunci === 'freebet_aktif' || s.kunci === 'maintenance_aktif' || s.kunci === 'register_bonus_aktif' || s.kunci === 'popup_aktif' ? (
+                          ) : ['jayapay_aktif','freebet_aktif','maintenance_aktif','register_bonus_aktif','popup_aktif'].includes(s.kunci) ? (
                             <select style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 12px', color: 'var(--text)', fontSize: 13, outline: 'none' }}
                               value={s.nilai} onChange={e => setSettingsList(prev => prev.map(x => x.kunci === s.kunci ? { ...x, nilai: e.target.value } : x))}>
                               <option value='false' style={{ background: '#111130' }}>❌ Nonaktif</option>
                               <option value='true' style={{ background: '#111130' }}>✅ Aktif</option>
+                            </select>
+                          ) : s.kunci === 'popup_tipe' ? (
+                            <select style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 12px', color: 'var(--text)', fontSize: 13, outline: 'none' }}
+                              value={s.nilai} onChange={e => setSettingsList(prev => prev.map(x => x.kunci === s.kunci ? { ...x, nilai: e.target.value } : x))}>
+                              <option value='freebet' style={{ background: '#111130' }}>🎁 Freebet App</option>
+                              <option value='pengumuman' style={{ background: '#111130' }}>📢 Pengumuman</option>
+                              <option value='promo' style={{ background: '#111130' }}>🎰 Promo</option>
+                              <option value='custom' style={{ background: '#111130' }}>✨ Custom</option>
+                            </select>
+                          ) : s.kunci === 'popup_target' ? (
+                            <select style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 12px', color: 'var(--text)', fontSize: 13, outline: 'none' }}
+                              value={s.nilai} onChange={e => setSettingsList(prev => prev.map(x => x.kunci === s.kunci ? { ...x, nilai: e.target.value } : x))}>
+                              <option value='semua' style={{ background: '#111130' }}>👥 Semua User</option>
+                              <option value='belum_login' style={{ background: '#111130' }}>🔓 Belum Login</option>
+                              <option value='sudah_login' style={{ background: '#111130' }}>🔐 Sudah Login</option>
+                            </select>
+                          ) : s.kunci === 'popup_frekuensi' ? (
+                            <select style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 12px', color: 'var(--text)', fontSize: 13, outline: 'none' }}
+                              value={s.nilai} onChange={e => setSettingsList(prev => prev.map(x => x.kunci === s.kunci ? { ...x, nilai: e.target.value } : x))}>
+                              <option value='sekali_sesi' style={{ background: '#111130' }}>🔁 Sekali per Sesi</option>
+                              <option value='setiap_kunjungan' style={{ background: '#111130' }}>👁️ Setiap Kunjungan</option>
+                              <option value='sekali_selamanya' style={{ background: '#111130' }}>1️⃣ Sekali Selamanya</option>
                             </select>
                           ) : (
                             <input style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 12px', color: 'var(--text)', fontSize: 13, outline: 'none' }}

@@ -26,6 +26,11 @@ interface BrandStore {
   popup_tombol_url: string
   download_apk_url: string
   freebet_nominal_display: string
+  popup_tipe: string
+  popup_warna: string
+  popup_ikon: string
+  popup_target: string
+  popup_frekuensi: string
   load: () => Promise<void>
 }
 
