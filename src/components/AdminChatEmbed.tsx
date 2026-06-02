@@ -28,6 +28,7 @@ export default function AdminChatEmbed() {
   const [chats, setChats] = useState<Chat[]>([])
   const [pesan, setPesan] = useState('')
   const [loading, setLoading] = useState(false)
+  const [sessionAktif, setSessionAktif] = useState(true)
   const bottomRef = useRef<HTMLDivElement>(null)
   const isMobile = window.innerWidth < 768
 
@@ -60,7 +61,7 @@ export default function AdminChatEmbed() {
     try {
       const res = await fetch(`/chat?user_id=${userId}`, { headers: authHeader() })
       const data = await res.json()
-      if (data.chats) setChats(data.chats)
+      if (data.chats) { setChats(data.chats); setSessionAktif(data.session_aktif !== false) }
       await fetch('/chat', { method: 'PATCH', headers: authHeader(), body: JSON.stringify({ user_id: userId }) })
     } catch { }
   }
@@ -79,6 +80,26 @@ export default function AdminChatEmbed() {
       if (data.chat) { setChats(prev => [...prev, data.chat]); setPesan('') }
     } catch { }
     finally { setLoading(false) }
+  }
+
+  async function endChat() {
+    try {
+      await fetch('/chat', {
+        method: 'POST',
+        headers: authHeader(),
+        body: JSON.stringify({ aksi: 'end_chat', user_id: selectedUser.user_id }),
+      })
+      muatUsers()
+      muatChat(selectedUser.user_id)
+    } catch {}
+  }
+
+  async function cleanupChat() {
+    try {
+      await fetch('/chat', { method: 'DELETE', headers: authHeader() })
+      alert('Cleanup selesai!')
+      muatUsers()
+    } catch {}
   }
 
   const totalUnread = chatUsers.reduce((s, u) => s + u.belum_dibaca, 0)
@@ -150,6 +171,12 @@ export default function AdminChatEmbed() {
               <div>
                 <div style={{ fontWeight: 700, fontSize: 13 }}>{selectedUser.username}</div>
                 <div style={{ fontSize: 10, color: '#00e676' }}>● Online</div>
+              {sessionAktif && (
+                <button onClick={endChat}
+                  style={{ marginLeft: 'auto', padding: '4px 10px', fontSize: 11, background: 'rgba(255,45,120,0.1)', border: '1px solid var(--pink)', color: 'var(--pink)', borderRadius: 6, cursor: 'pointer', fontWeight: 700 }}>
+                  Akhiri Chat
+                </button>
+              )}
               </div>
             </div>
 

@@ -533,6 +533,12 @@ export default function Admin() {
                       const res = await apiCall('/admin/sync-users', { method: 'POST' })
                       toast.success(res.pesan || 'Done')
                     }}>🔄 Sync Users NexusGGR</button>
+                  <button className='btn btn-outline' style={{ fontSize: 12 }}
+                    onClick={async () => {
+                      const res = await fetch('/chat', { method: 'DELETE', headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+                      const d = await res.json()
+                      toast.success(d.pesan || 'Cleanup selesai')
+                    }}>🗑️ Cleanup Chat Lama</button>
                 </div>
               </div>
             </div>
