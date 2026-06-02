@@ -67,11 +67,11 @@ export async function onRequestPost({ request, env }) {
   });
 
   await sendTelegram(env,
-    \`💰 <b>DEPOSIT DIKONFIRMASI</b>\n\n\` +
-    \`👤 User: <b>\${deposit.users?.username}</b>\n\` +
-    \`💵 Jumlah: <b>Rp \${deposit.amount.toLocaleString('id-ID')}</b>\n\` +
-    \`👨‍💼 Dikonfirmasi oleh: \${auth.username}\n\` +
-    \`🕐 \${new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} WIB\`
+    '💰 <b>DEPOSIT DIKONFIRMASI</b>\n\n' +
+    '👤 User: <b>' + deposit.users?.username + '</b>\n' +
+    '💵 Jumlah: <b>Rp ' + deposit.amount.toLocaleString('id-ID') + '</b>\n' +
+    '👨 Dikonfirmasi oleh: ' + auth.username + '\n' +
+    '🕐 ' + new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) + ' WIB'
   )
   return ok({ pesan: 'Deposit berhasil dikonfirmasi', saldo_baru: saldoBaru });
 }

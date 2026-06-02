@@ -263,7 +263,7 @@ export default function Beranda() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
           {/* Banner */}
-          <div style={{ borderRadius: 10, overflow: 'hidden', height: 220, background: s.gambar ? s.warna : s.warna, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', transition: 'background 0.5s' }}>
+          <div style={{ borderRadius: 10, overflow: 'hidden', height: 220, background: s.warna, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.5s' }}>
             <div style={{ textAlign: 'center', padding: 20 }}>
               <div style={{ display: 'inline-block', background: 'var(--pink)', color: 'white', fontSize: 10, padding: '3px 10px', borderRadius: 3, fontWeight: 700, letterSpacing: 2, marginBottom: 12 }}>{s.tag}</div>
               <div style={{ fontFamily: 'var(--display)', fontSize: 28, fontWeight: 900, lineHeight: 1.1, background: 'linear-gradient(135deg,#00c8ff,#ffd700)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: 10, whiteSpace: 'pre-line' }}>{s.judul}</div>
