@@ -173,13 +173,13 @@ export default function Game() {
                   style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', cursor: 'pointer', position: 'relative', active: { transform: 'scale(0.97)' } as any }}
                   onClick={() => launchGame(providerAktif, game.kode)}>
                   {game.banner
-                    ? <img src={game.banner} alt={game.nama} style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', display: 'block' }}
+                    ? <img src={game.banner} alt={game.nama?.replace(/_/g, ' ')} style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', display: 'block' }}
                         onError={e => { const img = e.target as HTMLImageElement; img.style.display = 'none'; (img.nextSibling as HTMLElement).style.display = 'flex' }} />
                     : null
                   }
                   <div style={{ display: game.banner ? 'none' : 'flex', aspectRatio: '4/3', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg,#1a1a40,#2a1050)', fontSize: 24 }}>🎰</div>
                   <div style={{ padding: '4px 6px 6px' }}>
-                    <div style={{ fontSize: 9, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text)' }}>{game.nama}</div>
+                    <div style={{ fontSize: 9, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text)' }}>{game.nama?.replace(/_/g, ' ')}</div>
                   </div>
                   {memuat === game.kode && (
                     <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -262,13 +262,13 @@ export default function Game() {
                       onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--blue)'; e.currentTarget.style.transform = 'translateY(-3px)'; (e.currentTarget.querySelector('.ov') as HTMLElement).style.opacity = '1' }}
                       onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'translateY(0)'; (e.currentTarget.querySelector('.ov') as HTMLElement).style.opacity = '0' }}>
                       {game.banner
-                        ? <img src={game.banner} alt={game.nama} style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', display: 'block' }}
+                        ? <img src={game.banner} alt={game.nama?.replace(/_/g, ' ')} style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', display: 'block' }}
                             onError={e => { const img = e.target as HTMLImageElement; img.style.display = 'none'; (img.nextSibling as HTMLElement).style.display = 'flex' }} />
                         : null
                       }
                       <div style={{ display: game.banner ? 'none' : 'flex', aspectRatio: '4/3', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg,#1a1a40,#2a1050)', fontSize: 28 }}>🎰</div>
                       <div style={{ padding: '6px 8px' }}>
-                        <div style={{ fontSize: 11, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{game.nama}</div>
+                        <div style={{ fontSize: 11, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{game.nama?.replace(/_/g, ' ')}</div>
                       </div>
                       <div className="ov" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}>
                         <button className="btn btn-primary" onClick={() => launchGame(providerAktif, game.kode)} disabled={memuat === game.kode} style={{ padding: '7px 20px', fontSize: 12 }}>
