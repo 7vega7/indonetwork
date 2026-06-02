@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { getSupabase, nexus, notifAdmin } from '../_utils';
+import { sendTelegram } from '../_telegram';
 
 export async function onRequestPost({ request, env }) {
   let body
