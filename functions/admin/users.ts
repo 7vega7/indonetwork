@@ -83,6 +83,19 @@ export async function onRequestPost({ request, env }) {
     return ok({ pesan: `Role diubah ke ${role_baru}` });
   }
 
+  if (aksi === 'edit_profil') {
+    await sb.from('users').update({
+      nama_lengkap: body.nama_lengkap || null,
+      no_telepon: body.no_telepon || null,
+      bank: body.bank || null,
+      no_rekening: body.no_rekening || null,
+      atas_nama: body.atas_nama || null,
+      profil_lengkap: !!(body.nama_lengkap && body.no_telepon && body.bank && body.no_rekening && body.atas_nama),
+    }).eq('id', user_id);
+    await logAdmin(env, auth, 'edit_profil_user', user_id, 'user', { username: user.username }, ip);
+    return ok({ pesan: 'Data user diupdate' });
+  }
+
   if (aksi === 'set_limit_withdraw') {
     await sb.from('users').update({ daily_withdraw_limit: limit_harian || 0 }).eq('id', user_id);
     return ok({ pesan: 'Limit withdraw harian diset' });

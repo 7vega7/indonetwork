@@ -95,6 +95,10 @@ export default function Admin() {
   const [cari, setCari] = useState('')
   const [statusFilter, setStatusFilter] = useState('pending')
   const [modalUser, setModalUser] = useState<any>(null)
+  const [modalEditUser, setModalEditUser] = useState<any>(null)
+  const [editUserForm, setEditUserForm] = useState<any>({})
+  const [modalKurangSaldo, setModalKurangSaldo] = useState<any>(null)
+  const [kurangSaldoJumlah, setKurangSaldoJumlah] = useState('')
   const [modalProvider, setModalProvider] = useState<any>(null)
   const [modalBanner, setModalBanner] = useState<any>(null)
   const [modalPromosi, setModalPromosi] = useState<any>(null)
@@ -386,14 +390,11 @@ export default function Admin() {
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ fontFamily: 'var(--display)', fontSize: 14, fontWeight: 700, color: 'var(--gold)' }}>Rp {u.balance.toLocaleString('id-ID')}</div>
                       <div style={{ display: 'flex', gap: 4, marginTop: 6, justifyContent: 'flex-end' }}>
-                        <button onClick={() => setModalUser(u)} style={{ padding: '4px 10px', fontSize: 10, background: 'rgba(0,200,255,0.1)', border: '1px solid var(--blue)', color: 'var(--blue)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>+ Saldo</button>
-                        <button onClick={() => { setModalResetPass(u); setResetPassBaru('') }} style={{ padding: '4px 10px', fontSize: 10, background: 'rgba(255,215,0,0.1)', border: '1px solid var(--gold)', color: 'var(--gold)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>🔑</button>
-                        {user?.role === 'owner' && u.role !== 'owner' && (
-                          <button onClick={() => setModalRole(u)} style={{ padding: '4px 10px', fontSize: 10, background: 'rgba(123,47,255,0.1)', border: '1px solid var(--purple)', color: 'var(--purple)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>👑</button>
-                        )}
-                        {u.role !== 'admin' && u.role !== 'owner' && (
-                          <button onClick={() => { setModalBan(u); setBanReason('') }} style={{ padding: '4px 10px', fontSize: 10, background: 'rgba(255,45,120,0.1)', border: '1px solid var(--pink)', color: 'var(--pink)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>🚫 Ban</button>
-                        )}
+                        <button onClick={() => setModalUser(u)} style={{ padding: '4px 8px', fontSize: 10, background: 'rgba(0,230,118,0.1)', border: '1px solid #00e676', color: '#00e676', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>+ Saldo</button>
+                        <button onClick={() => { setModalKurangSaldo(u); setKurangSaldoJumlah('') }} style={{ padding: '4px 8px', fontSize: 10, background: 'rgba(255,45,120,0.1)', border: '1px solid var(--pink)', color: 'var(--pink)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>- Saldo</button>
+                        <button onClick={() => { setModalEditUser(u); setEditUserForm({ nama_lengkap: u.nama_lengkap||'', no_telepon: u.no_telepon||'', bank: u.bank||'', no_rekening: u.no_rekening||'', atas_nama: u.atas_nama||'' }) }} style={{ padding: '4px 8px', fontSize: 10, background: 'rgba(0,200,255,0.1)', border: '1px solid var(--blue)', color: 'var(--blue)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>✏️</button>
+                        <button onClick={() => { setModalResetPass(u); setResetPassBaru('') }} style={{ padding: '4px 8px', fontSize: 10, background: 'rgba(255,215,0,0.1)', border: '1px solid var(--gold)', color: 'var(--gold)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>🔑</button>
+                        <button onClick={() => { setModalBan(u); setBanReason('') }} style={{ padding: '4px 8px', fontSize: 10, background: 'rgba(255,100,0,0.1)', border: '1px solid #ff6400', color: '#ff6400', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>🚫</button>
                         {u.role !== 'admin' && (
                           <button onClick={() => aksiBulkUser(u.is_active ? 'nonaktifkan' : 'aktifkan', u.id)}
                             style={{ padding: '4px 10px', fontSize: 10, background: u.is_active ? 'rgba(255,45,120,0.1)' : 'rgba(0,230,118,0.1)', border: `1px solid ${u.is_active ? 'var(--pink)' : '#00e676'}`, color: u.is_active ? 'var(--pink)' : '#00e676', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>
@@ -600,6 +601,265 @@ export default function Admin() {
         </div>
       )}
 
+      {/* Staff - hanya owner */}
+      {tab === 'staff' && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <div style={{ fontSize: 12, color: 'var(--muted)' }}>Kelola akun Admin dan CS</div>
+            <button className='btn btn-primary' onClick={() => { setModalTambahStaff(true); setStaffForm({ username: '', email: '', password: '', role: 'admin' }) }}
+              style={{ padding: '7px 14px', fontSize: 12 }}>+ Tambah Staff</button>
+          </div>
+          {loading ? <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}><div className='spinner' /></div> : (
+            <div className='card' style={{ padding: 0, overflow: 'hidden' }}>
+              {staffList.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: 40, color: 'var(--muted)' }}>Belum ada staff</div>
+              ) : staffList.map((s, i) => (
+                <div key={s.id} style={{ padding: '12px 16px', borderBottom: i < staffList.length-1 ? '1px solid rgba(255,255,255,0.05)' : 'none', opacity: s.is_active ? 1 : 0.5 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: s.role === 'owner' ? 'linear-gradient(135deg,#ffd700,#ff9500)' : s.role === 'admin' ? 'linear-gradient(135deg,var(--blue),var(--purple))' : 'linear-gradient(135deg,var(--purple),var(--pink))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
+                      {s.role === 'owner' ? '👑' : s.role === 'admin' ? '🛡️' : '🎧'}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: 13 }}>{s.username}
+                        <span style={{ fontSize: 10, marginLeft: 6, color: s.role === 'owner' ? 'var(--gold)' : s.role === 'admin' ? 'var(--blue)' : 'var(--purple)', background: 'rgba(255,255,255,0.05)', padding: '1px 6px', borderRadius: 4 }}>{s.role.toUpperCase()}</span>
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--muted)' }}>{s.email}</div>
+                      <div style={{ fontSize: 10, color: s.is_active ? '#00e676' : 'var(--pink)' }}>{s.is_active ? '● Aktif' : '● Nonaktif'}</div>
+                    </div>
+                    {s.role !== 'owner' && (
+                      <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                        <button onClick={() => { setModalStaffResetPass(s); setStaffResetPass('') }}
+                          style={{ padding: '4px 10px', fontSize: 10, background: 'rgba(255,215,0,0.1)', border: '1px solid var(--gold)', color: 'var(--gold)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>🔑</button>
+                        <button onClick={() => setModalStaff(s)}
+                          style={{ padding: '4px 10px', fontSize: 10, background: 'rgba(123,47,255,0.1)', border: '1px solid var(--purple)', color: 'var(--purple)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>✏️</button>
+                        <button onClick={async () => {
+                          const aksi = s.is_active ? 'nonaktifkan' : 'aktifkan'
+                          const res = await apiCall('/admin/staff', { method: 'POST', body: JSON.stringify({ aksi, user_id: s.id }) })
+                          if (res.status === 0) toast.error(res.error)
+                          else { toast.success(res.pesan); muatStaff() }
+                        }} style={{ padding: '4px 10px', fontSize: 10, background: s.is_active ? 'rgba(255,45,120,0.1)' : 'rgba(0,230,118,0.1)', border: `1px solid ${s.is_active ? 'var(--pink)' : '#00e676'}`, color: s.is_active ? 'var(--pink)' : '#00e676', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>
+                          {s.is_active ? '🚫' : '✅'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Logs */}
+      {tab === 'logs' && (
+        <div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 14 }}>Log semua aktivitas admin</div>
+          {loading ? <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}><div className='spinner' /></div> : (
+            <div className='card' style={{ padding: 0, overflow: 'hidden' }}>
+              {logs.length === 0 ? <div style={{ textAlign: 'center', padding: 40, color: 'var(--muted)' }}>Belum ada log</div>
+              : logs.map((l, i) => (
+                <div key={l.id} style={{ padding: '10px 16px', borderBottom: i < logs.length-1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                    <div>
+                      <span style={{ fontWeight: 700, color: 'var(--gold)', fontSize: 13 }}>{l.admin_username}</span>
+                      <span style={{ color: 'var(--muted)', fontSize: 13 }}> → {l.aksi}</span>
+                      {l.detail?.username && <span style={{ fontSize: 12, color: 'var(--blue)' }}> [{l.detail.username}]</span>}
+                      {l.detail?.jumlah && <span style={{ fontSize: 12, color: '#00e676' }}> Rp {parseInt(l.detail.jumlah).toLocaleString('id-ID')}</span>}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--muted)' }}>{new Date(l.created_at).toLocaleString('id-ID')}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Export */}
+      {tab === 'export' && (
+        <div>
+          <div className='card'>
+            <div style={{ fontWeight: 700, marginBottom: 16, color: 'var(--gold)' }}>📥 Export Data CSV</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, color: 'var(--muted)', display: 'block', marginBottom: 6 }}>Tipe Data</label>
+                <select style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 12px', color: 'var(--text)', fontSize: 13, outline: 'none' }}
+                  value={exportTipe} onChange={e => setExportTipe(e.target.value)}>
+                  {['transaksi','deposit','withdraw','users'].map(t => <option key={t} value={t} style={{ background: '#111130' }}>{t}</option>)}
+                </select>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div>
+                  <label style={{ fontSize: 12, color: 'var(--muted)', display: 'block', marginBottom: 6 }}>Dari</label>
+                  <input type='date' style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 12px', color: 'var(--text)', fontSize: 13, outline: 'none' }}
+                    value={exportDari} onChange={e => setExportDari(e.target.value)} />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, color: 'var(--muted)', display: 'block', marginBottom: 6 }}>Sampai</label>
+                  <input type='date' style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 12px', color: 'var(--text)', fontSize: 13, outline: 'none' }}
+                    value={exportSampai} onChange={e => setExportSampai(e.target.value)} />
+                </div>
+              </div>
+              <button className='btn btn-primary' style={{ width: '100%', padding: 13 }}
+                onClick={async () => {
+                  const res = await fetch(`/admin/export?tipe=${exportTipe}&dari=${exportDari}&sampai=${exportSampai}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+                  const blob = await res.blob()
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `${exportTipe}_${exportDari}_${exportSampai}.csv`
+                  a.click()
+                }}>
+                📥 Download CSV
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Tambah Staff */}
+      {modalTambahStaff && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div className='card' style={{ width: '100%', maxWidth: 420 }}>
+            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 16, color: 'var(--gold)' }}>👑 Tambah Staff</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div><label style={labelStyle}>Role</label>
+                <select style={{ ...inputStyle, cursor: 'pointer' }} value={staffForm.role}
+                  onChange={e => setStaffForm((f: any) => ({ ...f, role: e.target.value }))}>
+                  <option value='admin' style={{ background: '#111130' }}>🛡️ Admin</option>
+                  <option value='cs' style={{ background: '#111130' }}>🎧 CS</option>
+                </select>
+              </div>
+              <div><label style={labelStyle}>Username</label>
+                <input style={inputStyle} placeholder='Username staff' value={staffForm.username}
+                  onChange={e => setStaffForm((f: any) => ({ ...f, username: e.target.value }))} />
+              </div>
+              <div><label style={labelStyle}>Email (opsional)</label>
+                <input style={inputStyle} type='email' placeholder='email@staff.com' value={staffForm.email}
+                  onChange={e => setStaffForm((f: any) => ({ ...f, email: e.target.value }))} />
+              </div>
+              <div><label style={labelStyle}>Password</label>
+                <input style={inputStyle} type='password' placeholder='Min 6 karakter' value={staffForm.password}
+                  onChange={e => setStaffForm((f: any) => ({ ...f, password: e.target.value }))} />
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className='btn btn-primary' style={{ flex: 1 }}
+                  onClick={async () => {
+                    const res = await apiCall('/admin/staff', { method: 'POST', body: JSON.stringify({ aksi: 'tambah_staff', ...staffForm }) })
+                    if (res.status === 0) toast.error(res.error)
+                    else { toast.success(res.pesan); setModalTambahStaff(false); muatStaff() }
+                  }}>✅ Tambah</button>
+                <button className='btn btn-outline' onClick={() => setModalTambahStaff(false)} style={{ flex: 1 }}>Batal</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Set Role Staff */}
+      {modalStaff && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div className='card' style={{ width: '100%', maxWidth: 380 }}>
+            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 16, color: 'var(--purple)' }}>✏️ Ubah Role — {modalStaff.username}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { role: 'admin', label: '🛡️ Admin', desc: 'Kelola deposit, withdraw, users, chat', color: 'var(--blue)' },
+                { role: 'cs', label: '🎧 CS', desc: 'Hanya akses Live Chat', color: 'var(--purple)' },
+              ].map(r => (
+                <button key={r.role}
+                  onClick={async () => {
+                    const res = await apiCall('/admin/staff', { method: 'POST', body: JSON.stringify({ aksi: 'set_role', user_id: modalStaff.id, role_baru: r.role }) })
+                    if (res.status === 0) toast.error(res.error)
+                    else { toast.success(res.pesan); setModalStaff(null); muatStaff() }
+                  }}
+                  style={{ padding: '12px 16px', border: `1px solid ${r.color}`, borderRadius: 8, background: `${r.color}15`, cursor: 'pointer', textAlign: 'left' }}>
+                  <div style={{ fontWeight: 700, color: r.color }}>{r.label}</div>
+                  <div style={{ fontSize: 11, color: 'var(--muted)' }}>{r.desc}</div>
+                </button>
+              ))}
+              <button className='btn btn-outline' style={{ color: 'var(--pink)', borderColor: 'var(--pink)' }}
+                onClick={async () => {
+                  if (!confirm('Hapus staff ini?')) return
+                  const res = await apiCall('/admin/staff', { method: 'POST', body: JSON.stringify({ aksi: 'hapus', user_id: modalStaff.id }) })
+                  if (res.status === 0) toast.error(res.error)
+                  else { toast.success(res.pesan); setModalStaff(null); muatStaff() }
+                }}>🗑️ Hapus dari Staff</button>
+              <button className='btn btn-outline' onClick={() => setModalStaff(null)}>Batal</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Reset Password Staff */}
+      {modalStaffResetPass && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div className='card' style={{ width: '100%', maxWidth: 380 }}>
+            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 16, color: 'var(--gold)' }}>🔑 Reset Password — {modalStaffResetPass.username}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div><label style={labelStyle}>Password Baru</label>
+                <input style={inputStyle} type='text' placeholder='Min 6 karakter' value={staffResetPass}
+                  onChange={e => setStaffResetPass(e.target.value)} />
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className='btn btn-primary' style={{ flex: 1 }}
+                  onClick={async () => {
+                    const res = await apiCall('/admin/staff', { method: 'POST', body: JSON.stringify({ aksi: 'reset_password', user_id: modalStaffResetPass.id, password_baru: staffResetPass }) })
+                    if (res.status === 0) toast.error(res.error)
+                    else { toast.success(res.pesan); setModalStaffResetPass(null) }
+                  }}>🔑 Reset</button>
+                <button className='btn btn-outline' onClick={() => setModalStaffResetPass(null)} style={{ flex: 1 }}>Batal</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Ban */}
+      {modalBan && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div className='card' style={{ width: '100%', maxWidth: 400 }}>
+            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 16, color: 'var(--pink)' }}>🚫 Ban User — {modalBan.username}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div><label style={labelStyle}>Alasan Ban</label>
+                <input style={inputStyle} type='text' placeholder='Melanggar ketentuan...' value={banReason} onChange={e => setBanReason(e.target.value)} />
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className='btn btn-primary' style={{ flex: 1, background: 'linear-gradient(135deg,#ff2d78,#ff0000)' }}
+                  onClick={async () => {
+                    const res = await apiCall('/admin/users', { method: 'POST', body: JSON.stringify({ aksi: 'ban', user_id: modalBan.id, ban_reason: banReason }) })
+                    if (res.status === 0) toast.error(res.error)
+                    else { toast.success('User diban!'); setModalBan(null); muatUsers() }
+                  }}>🚫 Ban</button>
+                <button className='btn btn-outline' onClick={() => setModalBan(null)} style={{ flex: 1 }}>Batal</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Reset Password User */}
+      {modalResetPass && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div className='card' style={{ width: '100%', maxWidth: 400 }}>
+            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 16, color: 'var(--gold)' }}>🔑 Reset Password — {modalResetPass.username}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div><label style={labelStyle}>Password Baru</label>
+                <input style={inputStyle} type='text' placeholder='Min 6 karakter' value={resetPassBaru} onChange={e => setResetPassBaru(e.target.value)} />
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className='btn btn-primary' style={{ flex: 1 }}
+                  onClick={async () => {
+                    const res = await apiCall('/admin/users', { method: 'POST', body: JSON.stringify({ aksi: 'reset_password', user_id: modalResetPass.id, password_baru: resetPassBaru }) })
+                    if (res.status === 0) toast.error(res.error)
+                    else { toast.success('Password direset!'); setModalResetPass(null) }
+                  }}>🔑 Reset</button>
+                <button className='btn btn-outline' onClick={() => setModalResetPass(null)} style={{ flex: 1 }}>Batal</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal Tambah Saldo */}
       {modalUser && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
@@ -616,6 +876,74 @@ export default function Admin() {
               <div style={{ display: 'flex', gap: 8 }}>
                 <button className="btn btn-primary" onClick={handleTambahSaldo} style={{ flex: 1 }}>Tambah</button>
                 <button className="btn btn-outline" onClick={() => { setModalUser(null); setTambahSaldo(''); setKeteranganSaldo('') }} style={{ flex: 1 }}>Batal</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {/* Modal Edit User */}
+      {modalEditUser && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, overflowY: 'auto' }}>
+          <div className='card' style={{ width: '100%', maxWidth: 440, margin: 'auto' }}>
+            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 16 }}>✏️ Edit Data — {modalEditUser.username}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div><label style={labelStyle}>Nama Lengkap</label>
+                <input style={inputStyle} value={editUserForm.nama_lengkap} onChange={e => setEditUserForm((f: any) => ({ ...f, nama_lengkap: e.target.value }))} placeholder='Nama lengkap' />
+              </div>
+              <div><label style={labelStyle}>No. Telepon</label>
+                <input style={inputStyle} value={editUserForm.no_telepon} onChange={e => setEditUserForm((f: any) => ({ ...f, no_telepon: e.target.value }))} placeholder='08xxx' />
+              </div>
+              <div><label style={labelStyle}>Bank</label>
+                <select style={{ ...inputStyle, cursor: 'pointer' }} value={editUserForm.bank} onChange={e => setEditUserForm((f: any) => ({ ...f, bank: e.target.value }))}>
+                  <option value='' style={{ background: '#111130' }}>Pilih Bank</option>
+                  {['BCA','BRI','BNI','Mandiri','CIMB Niaga','Permata','Danamon','BTN','BSI','Jenius','SeaBank','GoPay','OVO','Dana'].map(b => (
+                    <option key={b} value={b} style={{ background: '#111130' }}>{b}</option>
+                  ))}
+                </select>
+              </div>
+              <div><label style={labelStyle}>No. Rekening</label>
+                <input style={inputStyle} value={editUserForm.no_rekening} onChange={e => setEditUserForm((f: any) => ({ ...f, no_rekening: e.target.value }))} placeholder='Nomor rekening' />
+              </div>
+              <div><label style={labelStyle}>Atas Nama</label>
+                <input style={inputStyle} value={editUserForm.atas_nama} onChange={e => setEditUserForm((f: any) => ({ ...f, atas_nama: e.target.value }))} placeholder='Nama pemilik rekening' />
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className='btn btn-primary' style={{ flex: 1 }}
+                  onClick={async () => {
+                    const res = await apiCall('/admin/users', { method: 'POST', body: JSON.stringify({ aksi: 'edit_profil', user_id: modalEditUser.id, ...editUserForm }) })
+                    if (res.status === 0) toast.error(res.error)
+                    else { toast.success('Data user diupdate!'); setModalEditUser(null); muatUsers() }
+                  }}>💾 Simpan</button>
+                <button className='btn btn-outline' onClick={() => setModalEditUser(null)} style={{ flex: 1 }}>Batal</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Kurang Saldo */}
+      {modalKurangSaldo && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div className='card' style={{ width: '100%', maxWidth: 400 }}>
+            <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4, color: 'var(--pink)' }}>💸 Kurang Saldo — {modalKurangSaldo.username}</div>
+            <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 16 }}>Saldo saat ini: Rp {modalKurangSaldo.balance?.toLocaleString('id-ID')}</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div><label style={labelStyle}>Jumlah</label>
+                <input style={inputStyle} type='text' placeholder='Rp 0' value={kurangSaldoJumlah}
+                  onChange={e => { const n = e.target.value.replace(/\D/g,''); setKurangSaldoJumlah(n ? parseInt(n).toLocaleString('id-ID') : '') }} />
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className='btn btn-primary' style={{ flex: 1, background: 'linear-gradient(135deg,#ff2d78,#ff9500)' }}
+                  onClick={async () => {
+                    const jumlah = parseInt(kurangSaldoJumlah.replace(/\D/g,''))
+                    if (!jumlah) { toast.error('Jumlah tidak valid'); return }
+                    const res = await apiCall('/admin/users', { method: 'POST', body: JSON.stringify({ aksi: 'kurang_saldo', user_id: modalKurangSaldo.id, jumlah }) })
+                    if (res.status === 0) toast.error(res.error)
+                    else { toast.success(`Saldo dikurangi! Sisa: Rp ${res.saldo_baru?.toLocaleString('id-ID')}`); setModalKurangSaldo(null); setKurangSaldoJumlah(''); muatUsers() }
+                  }}>💸 Kurangi</button>
+                <button className='btn btn-outline' onClick={() => { setModalKurangSaldo(null); setKurangSaldoJumlah('') }} style={{ flex: 1 }}>Batal</button>
               </div>
             </div>
           </div>
