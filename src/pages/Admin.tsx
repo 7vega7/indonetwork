@@ -18,6 +18,7 @@ const TAB_ALL = [
   { kode: 'chat', label: '💬 Live Chat' },
   { kode: 'logs', label: '📋 Log Aktivitas' },
   { kode: 'export', label: '📥 Export' },
+  { kode: 'staff', label: '👑 Staff' },
 ]
 
 
@@ -60,7 +61,7 @@ export default function Admin() {
   const TAB = user?.role === 'cs'
     ? TAB_ALL.filter(t => t.kode === 'chat')
     : user?.role === 'admin'
-    ? TAB_ALL.filter(t => !['providers','banner','promosi','settings','logs','export'].includes(t.kode))
+    ? TAB_ALL.filter(t => !['providers','banner','promosi','settings','logs','export','staff'].includes(t.kode))
     : TAB_ALL
   const navigate = useNavigate()
   const navigateOut = navigate
@@ -81,6 +82,12 @@ export default function Admin() {
   const [banReason, setBanReason] = useState('')
   const [resetPassBaru, setResetPassBaru] = useState('')
   const [exportTipe, setExportTipe] = useState('transaksi')
+  const [staffList, setStaffList] = useState<any[]>([])
+  const [modalStaff, setModalStaff] = useState<any>(null)
+  const [modalTambahStaff, setModalTambahStaff] = useState(false)
+  const [staffForm, setStaffForm] = useState({ username: '', email: '', password: '', role: 'admin' })
+  const [modalStaffResetPass, setModalStaffResetPass] = useState<any>(null)
+  const [staffResetPass, setStaffResetPass] = useState('')
   const [exportDari, setExportDari] = useState(new Date(Date.now()-30*24*60*60*1000).toISOString().split('T')[0])
   const [exportSampai, setExportSampai] = useState(new Date().toISOString().split('T')[0])
   const [settingsList, setSettingsList] = useState<any[]>([])
@@ -112,6 +119,7 @@ export default function Admin() {
     else if (tab === 'promosi') muatPromosi()
     else if (tab === 'settings') muatSettings()
     else if (tab === 'logs') muatLogs()
+    else if (tab === 'staff') muatStaff()
   }, [tab, statusFilter])
 
   const muatStats = async () => { const d = await apiCall('/admin/stats'); setStats(d.stats) }
@@ -127,6 +135,7 @@ export default function Admin() {
   const muatUsers = async () => { setLoading(true); const d = await apiCall(`/admin/users?cari=${cari}`); setUsers(d.users || []); setLoading(false) }
   const muatProviders = async () => { setLoading(true); const d = await apiCall('/admin/providers'); setProviders(d.providers || []); setLoading(false) }
   const muatBanners = async () => { setLoading(true); const d = await apiCall('/admin/banners'); setBanners(d.banners || []); setLoading(false) }
+  const muatStaff = async () => { setLoading(true); const d = await apiCall('/admin/staff'); setStaffList(d.staff || []); setLoading(false) }
   const muatLogs = async () => { setLoading(true); const d = await apiCall('/admin/logs'); setLogs(d.logs || []); setLoading(false) }
   const muatNotif = async () => { const d = await apiCall('/admin/notifikasi'); setNotifList(d.notifikasi || []); setNotifCount(d.total || 0) }
   const muatSettings = async () => { setLoading(true); const d = await apiCall('/admin/settings'); setSettingsList(d.settings || []); setLoading(false) }

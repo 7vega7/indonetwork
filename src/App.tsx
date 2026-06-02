@@ -32,7 +32,7 @@ export default function App() {
   const { user } = useAuth()
   const { maintenance_aktif, maintenance_pesan, nama, loaded } = useBrand()
 
-  const isAdmin = user?.role === 'admin'
+  const isAdmin = ['admin','owner','cs'].includes(user?.role || '')
   const isAdminLoginPath = window.location.hash.includes('/admin-login')
   const path = window.location.hash
 

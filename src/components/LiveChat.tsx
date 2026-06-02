@@ -111,7 +111,7 @@ export default function LiveChat() {
     } catch { }
   }
 
-  if (!isLoggedIn || user?.role === 'admin') return null
+  if (!isLoggedIn || ['admin','owner','cs'].includes(user?.role || '')) return null
 
   return (
     <>

@@ -29,7 +29,7 @@ export async function onRequestGet({ request, env }) {
   const userId = url.searchParams.get('user_id')
   const sb = getSupabase(env)
 
-  if (auth.role === 'admin') {
+  if (['admin','owner','cs'].includes(auth.role)) {
     if (userId) {
       // Chat per user
       const { data } = await sb
@@ -128,13 +128,13 @@ export async function onRequestPost({ request, env }) {
 
   // End chat session
   if (aksi === 'end_chat') {
-    const targetUserId = auth.role === 'admin' ? user_id : auth.sub
+    const targetUserId = ['admin','owner','cs'].includes(auth.role) ? user_id : auth.sub
     if (!targetUserId) return err('user_id diperlukan')
 
     await sb.from('chat_sessions')
       .update({
         status: 'ended',
-        ended_by: auth.role === 'admin' ? 'admin' : 'user',
+        ended_by: ['admin','owner','cs'].includes(auth.role) ? 'admin' : 'user',
         ended_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
@@ -142,12 +142,12 @@ export async function onRequestPost({ request, env }) {
       .eq('status', 'active')
 
     // Kirim pesan sistem
-    const siapaMengakhiri = auth.role === 'admin' ? 'Admin' : auth.username
+    const siapaMengakhiri = ['admin','owner','cs'].includes(auth.role) ? 'Admin' : auth.username
     await sb.from('chats').insert({
       user_id: targetUserId,
       username: auth.username,
       pesan: `— Chat diakhiri oleh ${siapaMengakhiri} —`,
-      dari: auth.role === 'admin' ? 'admin' : 'user',
+      dari: ['admin','owner','cs'].includes(auth.role) ? 'admin' : 'user',
       dibaca: false,
     })
 
@@ -157,7 +157,7 @@ export async function onRequestPost({ request, env }) {
   // Kirim pesan
   if (!pesan?.trim()) return err('Pesan tidak boleh kosong')
 
-  if (auth.role === 'admin') {
+  if (['admin','owner','cs'].includes(auth.role)) {
     if (!user_id) return err('user_id diperlukan')
     const { data: user } = await sb.from('users').select('username').eq('id', user_id).single()
 
@@ -198,7 +198,7 @@ export async function onRequestPost({ request, env }) {
 
 export async function onRequestPatch({ request, env }) {
   const auth = await getAuth(request, env)
-  if (!auth || auth.role !== 'admin') return err('Akses admin diperlukan', 403)
+  if (!auth || !['admin','owner','cs'].includes(auth.role)) return err('Akses admin diperlukan', 403)
 
   let body
   try { body = await request.json() } catch { return err('Body tidak valid') }
@@ -217,7 +217,7 @@ export async function onRequestPatch({ request, env }) {
 export async function onRequestDelete({ request, env }) {
   // Auto cleanup chat lama (dipanggil dari cron)
   const auth = await getAuth(request, env)
-  if (!auth || auth.role !== 'admin') return err('Akses admin diperlukan', 403)
+  if (!auth || !['admin','owner','cs'].includes(auth.role)) return err('Akses admin diperlukan', 403)
 
   const sb = getSupabase(env)
 

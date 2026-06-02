@@ -12,7 +12,7 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false)
 
   // Jika sudah login sebagai admin, redirect ke admin
-  if (user?.role === 'admin') {
+  if (['admin','owner','cs'].includes(user?.role || '')) {
     navigate('/admin')
     return null
   }
