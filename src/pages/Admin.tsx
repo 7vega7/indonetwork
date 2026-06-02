@@ -541,7 +541,7 @@ export default function Admin() {
       )}
       {/* Chat */}
       {tab === 'chat' && (
-        <div style={{ margin: '-20px', height: 'calc(100vh - 180px)', minHeight: 500 }}>
+        <div style={{ height: 'calc(100vh - 200px)', minHeight: 500, marginTop: 16 }}>
           <AdminChatEmbed />
         </div>
       )}
