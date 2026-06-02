@@ -37,6 +37,14 @@ export async function onRequestPost({ request, env }) {
     if (existRek) return err('No. rekening sudah terdaftar');
   }
 
+  // Ambil settings dulu sebelum insert
+  const settings = await getSettings(env);
+  const freebetAktif = settings['freebet_aktif'] === 'true';
+  const freebetRef = settings['freebet_ref'] || 'app';
+  const freebetJumlah = parseInt(settings['freebet_jumlah'] || '10000');
+  const registerBonusAktif = settings['register_bonus_aktif'] === 'true';
+  const registerBonusJumlah = parseInt(settings['register_bonus_jumlah'] || '0');
+
   const passwordHash = await hashPassword(password);
   const kodeReferral = username.substring(0, 3).toUpperCase() + Math.random().toString(36).substring(2, 7).toUpperCase();
 
@@ -72,17 +80,7 @@ export async function onRequestPost({ request, env }) {
     await nexus(env, { method: 'user_create', user_code: user.username });
   } catch(e) { console.error('NexusGGR user_create error:', e); }
 
-  // Ambil settings
-  const settings = await getSettings(env);
-
-  // Cek freebet (ref=app atau sesuai setting)
-  const freebetAktif = settings['freebet_aktif'] === 'true';
-  const freebetRef = settings['freebet_ref'] || 'app';
-  const freebetJumlah = parseInt(settings['freebet_jumlah'] || '10000');
-
-  // Cek register bonus
-  const registerBonusAktif = settings['register_bonus_aktif'] === 'true';
-  const registerBonusJumlah = parseInt(settings['register_bonus_jumlah'] || '0');
+  // Settings sudah diambil di atas
 
   let saldoBonus = 0;
 
