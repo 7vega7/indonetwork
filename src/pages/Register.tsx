@@ -26,37 +26,20 @@ export default function Register() {
   useEffect(() => { if (isLoggedIn) navigate('/') }, [isLoggedIn])
 
   useEffect(() => {
-    if (tsRendered.current) return
-
-    const renderWidget = () => {
-      if (!tsRef.current || tsRendered.current) return
+    const t = setInterval(() => {
+      const el = document.getElementById('ts-register')
+      if (!el || tsRendered.current) return
+      if (!window.turnstile) return
+      clearInterval(t)
       tsRendered.current = true
-      window.turnstile.render(tsRef.current, {
+      window.turnstile.render(el, {
         sitekey: '0x4AAAAAAABkMYinukE8nsd9',
         callback: (token: string) => setTsToken(token),
-        'expired-callback': () => { setTsToken(''); tsRendered.current = false },
+        'expired-callback': () => setTsToken(''),
         theme: 'dark', size: 'normal',
       })
-    }
-
-    if (window.turnstile) {
-      renderWidget()
-    } else {
-      // Load script jika belum ada
-      if (!document.querySelector('script[src*="turnstile"]')) {
-        const script = document.createElement('script')
-        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
-        script.async = true
-        script.defer = true
-        script.onload = renderWidget
-        document.head.appendChild(script)
-      } else {
-        const t = setInterval(() => {
-          if (window.turnstile) { renderWidget(); clearInterval(t) }
-        }, 100)
-        return () => clearInterval(t)
-      }
-    }
+    }, 100)
+    return () => clearInterval(t)
   }, [])
 
   const cekUsername = (val: string) => {
@@ -194,7 +177,7 @@ export default function Register() {
           </div>
 
           {/* Turnstile */}
-          <div ref={tsRef} style={{ borderRadius: 6, overflow: 'hidden' }} />
+          <div id="ts-register" style={{ borderRadius: 6, overflow: 'hidden' }} />
 
           <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%', padding: 13, fontSize: 14, marginTop: 4 }}>
             {loading ? 'Mendaftar...' : '🚀 Daftar Sekarang'}
