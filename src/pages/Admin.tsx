@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { adminApi } from '../lib/api'
 import toast from 'react-hot-toast'
 import AdminChatEmbed from '../components/AdminChatEmbed'
@@ -53,7 +54,8 @@ const PROMOSI_KOSONG = {
 }
 
 export default function Admin() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
+  const navigateOut = useNavigate()
   const navigate = useNavigate()
   const [tab, setTab] = useState('dashboard')
   const [stats, setStats] = useState<any>(null)
@@ -186,8 +188,14 @@ export default function Admin() {
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: isMobile ? '10px 8px' : 20, paddingBottom: 80 }}>
 
-      <div style={{ fontFamily: 'var(--display)', fontSize: isMobile ? 16 : 20, fontWeight: 900, background: 'linear-gradient(135deg,#ffd700,#ff9500)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: 20 }}>
-        👑 ADMIN PANEL
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <div style={{ fontFamily: 'var(--display)', fontSize: isMobile ? 16 : 20, fontWeight: 900, background: 'linear-gradient(135deg,#ffd700,#ff9500)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+          👑 ADMIN PANEL
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => navigateOut('/')} style={{ padding: '6px 12px', fontSize: 11, background: 'rgba(0,200,255,0.1)', border: '1px solid var(--blue)', color: 'var(--blue)', borderRadius: 6, cursor: 'pointer', fontWeight: 600 }}>🌐 Website</button>
+          <button onClick={() => { logout(); navigateOut('/') }} style={{ padding: '6px 12px', fontSize: 11, background: 'rgba(255,45,120,0.1)', border: '1px solid var(--pink)', color: 'var(--pink)', borderRadius: 6, cursor: 'pointer', fontWeight: 600 }}>🚪 Keluar</button>
+        </div>
       </div>
 
       {/* Tabs */}
