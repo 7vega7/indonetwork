@@ -18,6 +18,14 @@ interface BrandStore {
   min_withdraw: number
   max_withdraw: number
   loaded: boolean
+  popup_aktif: boolean
+  popup_judul: string
+  popup_pesan: string
+  popup_gambar_url: string
+  popup_tombol_teks: string
+  popup_tombol_url: string
+  download_apk_url: string
+  freebet_nominal_display: string
   load: () => Promise<void>
 }
 
@@ -39,6 +47,14 @@ export const useBrand = create<BrandStore>((set) => ({
   min_withdraw: 50000,
   max_withdraw: 50000000,
   loaded: false,
+  popup_aktif: false,
+  popup_judul: 'Download Aplikasi & Dapat Freebet!',
+  popup_pesan: 'Download aplikasi kami dan daftar untuk mendapatkan freebet gratis!',
+  popup_gambar_url: '',
+  popup_tombol_teks: 'Download Sekarang',
+  popup_tombol_url: '/download',
+  download_apk_url: '',
+  freebet_nominal_display: 'Rp 10.000',
   load: async () => {
     try {
       const res = await fetch('/api/brand')

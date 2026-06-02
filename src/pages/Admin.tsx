@@ -529,6 +529,9 @@ export default function Admin() {
                 { judul: '🎁 Bonus Register', prefix: 'register_bonus_' },
                 { judul: '🎁 Freebet', prefix: 'freebet_' },
                 { judul: '📱 Telegram', prefix: 'telegram_' },
+                { judul: '🎁 Popup & Download', prefix: 'popup_' },
+                { judul: '🎁 Popup & Download', prefix: 'download_' },
+                { judul: '🎁 Popup & Download', prefix: 'freebet_nominal' },
                 { judul: '💳 JayaPay', prefix: 'jayapay_' },
               ].map(group => {
                 const items = settingsList.filter(s => s.kunci.startsWith(group.prefix))
@@ -547,7 +550,7 @@ export default function Admin() {
                               <option value='test' style={{ background: '#111130' }}>test</option>
                               <option value='live' style={{ background: '#111130' }}>live</option>
                             </select>
-                          ) : s.kunci === 'jayapay_aktif' || s.kunci === 'freebet_aktif' || s.kunci === 'maintenance_aktif' || s.kunci === 'register_bonus_aktif' ? (
+                          ) : s.kunci === 'jayapay_aktif' || s.kunci === 'freebet_aktif' || s.kunci === 'maintenance_aktif' || s.kunci === 'register_bonus_aktif' || s.kunci === 'popup_aktif' ? (
                             <select style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', borderRadius: 6, padding: '8px 12px', color: 'var(--text)', fontSize: 13, outline: 'none' }}
                               value={s.nilai} onChange={e => setSettingsList(prev => prev.map(x => x.kunci === s.kunci ? { ...x, nilai: e.target.value } : x))}>
                               <option value='false' style={{ background: '#111130' }}>❌ Nonaktif</option>

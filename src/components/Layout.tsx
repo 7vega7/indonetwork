@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { useBrand } from '../hooks/useBrand'
 import LiveChat from './LiveChat'
+import PopupApp from './PopupApp'
 import toast from 'react-hot-toast'
 
 const NAV_ITEMS = [
@@ -150,7 +151,8 @@ export default function Layout() {
           <div style={{ display: 'flex', gap: 40 }}>
             {[
               { judul: 'Game', links: ['🎰 Slot', '🃏 Live Casino', '🚀 Crash Game', '⚽ Sportsbook'] },
-              { judul: 'Bantuan', links: [
+              { judul: 'Unduh', links: ['📲 Download App'] },
+            { judul: 'Bantuan', links: [
               brand.whatsapp_url ? '📱 WhatsApp' : null,
               brand.livechat_url ? '💬 Live Chat' : null,
               brand.telegram_url ? '📩 Telegram' : null,
@@ -169,6 +171,7 @@ export default function Layout() {
         </div>
       </footer>
       <LiveChat />
+      <PopupApp />
     </div>
   )
 }

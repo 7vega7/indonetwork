@@ -13,6 +13,7 @@ import Riwayat from './pages/Riwayat'
 import Admin from './pages/Admin'
 import Promosi from './pages/Promosi'
 import AdminLogin from './pages/AdminLogin'
+import Download from './pages/Download'
 import AdminLayout from './components/AdminLayout'
 import AdminChat from './pages/AdminChat'
 
@@ -63,6 +64,7 @@ export default function App() {
         <Route path="promosi" element={<Promosi />} />
         <Route path="promosi/:slug" element={<Promosi />} />
         <Route path="admin-login" element={<AdminLogin />} />
+        <Route path="download" element={<Download />} />
       </Route>
         <Route path="admin" element={<AdminGuard><Admin /></AdminGuard>} />
         <Route path="admin/chat" element={<AdminGuard><AdminChat /></AdminGuard>} />

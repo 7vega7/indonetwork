@@ -11,6 +11,8 @@ export async function onRequestGet({ request, env }) {
       'whatsapp_url', 'telegram_url', 'livechat_url',
       'footer_teks', 'marquee_teks',
       'min_deposit', 'min_withdraw', 'max_withdraw',
+      'popup_aktif', 'popup_judul', 'popup_pesan', 'popup_gambar_url',
+      'popup_tombol_teks', 'popup_tombol_url', 'download_apk_url', 'freebet_nominal_display',
     ])
 
   const brand: Record<string, any> = {}
@@ -21,6 +23,7 @@ export async function onRequestGet({ request, env }) {
 
   // Konversi tipe
   brand.maintenance_aktif = brand.maintenance_aktif === 'true'
+  brand.popup_aktif = brand.popup_aktif === 'true'
   brand.min_deposit = parseInt(brand.min_deposit || '10000')
   brand.min_withdraw = parseInt(brand.min_withdraw || '50000')
   brand.max_withdraw = parseInt(brand.max_withdraw || '50000000')
