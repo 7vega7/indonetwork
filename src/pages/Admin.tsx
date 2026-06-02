@@ -19,6 +19,7 @@ const TAB_ALL = [
   { kode: 'logs', label: '📋 Log Aktivitas' },
   { kode: 'export', label: '📥 Export' },
   { kode: 'staff', label: '👑 Staff' },
+  { kode: 'freebet', label: '🎁 Freebet' },
 ]
 
 
@@ -83,6 +84,7 @@ export default function Admin() {
   const [resetPassBaru, setResetPassBaru] = useState('')
   const [exportTipe, setExportTipe] = useState('transaksi')
   const [staffList, setStaffList] = useState<any[]>([])
+  const [freebetData, setFreebetData] = useState<any>(null)
   const [modalStaff, setModalStaff] = useState<any>(null)
   const [modalTambahStaff, setModalTambahStaff] = useState(false)
   const [staffForm, setStaffForm] = useState({ username: '', email: '', password: '', role: 'admin' })
@@ -127,6 +129,7 @@ export default function Admin() {
     else if (tab === 'settings') muatSettings()
     else if (tab === 'logs') muatLogs()
     else if (tab === 'staff') muatStaff()
+    else if (tab === 'freebet') muatFreebet()
   }, [tab, statusFilter])
 
   const muatStats = async () => { const d = await apiCall('/admin/stats'); setStats(d.stats) }
@@ -142,6 +145,7 @@ export default function Admin() {
   const muatUsers = async () => { setLoading(true); const d = await apiCall(`/admin/users?cari=${cari}`); setUsers(d.users || []); setLoading(false) }
   const muatProviders = async () => { setLoading(true); const d = await apiCall('/admin/providers'); setProviders(d.providers || []); setLoading(false) }
   const muatBanners = async () => { setLoading(true); const d = await apiCall('/admin/banners'); setBanners(d.banners || []); setLoading(false) }
+  const muatFreebet = async () => { setLoading(true); const d = await apiCall('/admin/freebet'); setFreebetData(d); setLoading(false) }
   const muatStaff = async () => { setLoading(true); const d = await apiCall('/admin/staff'); setStaffList(d.staff || []); setLoading(false) }
   const muatLogs = async () => { setLoading(true); const d = await apiCall('/admin/logs'); setLogs(d.logs || []); setLoading(false) }
   const muatNotif = async () => { const d = await apiCall('/admin/notifikasi'); setNotifList(d.notifikasi || []); setNotifCount(d.total || 0) }
@@ -619,6 +623,79 @@ export default function Admin() {
       {tab === 'chat' && (
         <div style={{ height: 'calc(100vh - 200px)', minHeight: 500, marginTop: 16 }}>
           <AdminChatEmbed />
+        </div>
+      )}
+
+      {/* Freebet */}
+      {tab === 'freebet' && (
+        <div>
+          {loading ? <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}><div className='spinner' /></div> : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+              {/* Stats */}
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3,1fr)', gap: 12 }}>
+                {[
+                  { label: 'Total User Freebet', nilai: freebetData?.total_user || 0, ikon: '👥', warna: 'var(--blue)' },
+                  { label: 'Total Nominal', nilai: `Rp ${(freebetData?.total_nominal || 0).toLocaleString('id-ID')}`, ikon: '💰', warna: 'var(--gold)' },
+                  { label: 'Transaksi', nilai: freebetData?.transaksi?.length || 0, ikon: '📋', warna: '#00e676' },
+                ].map(s => (
+                  <div key={s.label} className='card' style={{ textAlign: 'center', borderColor: `${s.warna}40` }}>
+                    <div style={{ fontSize: 24, marginBottom: 6 }}>{s.ikon}</div>
+                    <div style={{ fontFamily: 'var(--display)', fontSize: 18, fontWeight: 900, color: s.warna }}>{s.nilai}</div>
+                    <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* List User Freebet */}
+              <div className='card' style={{ padding: 0, overflow: 'hidden' }}>
+                <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', fontWeight: 700, fontSize: 13, color: 'var(--gold)' }}>
+                  🎁 User yang Mendapat Freebet
+                </div>
+                {!freebetData?.users?.length ? (
+                  <div style={{ textAlign: 'center', padding: 40, color: 'var(--muted)' }}>Belum ada user freebet</div>
+                ) : freebetData.users.map((u: any, i: number) => (
+                  <div key={u.id} style={{ padding: '10px 16px', borderBottom: i < freebetData.users.length-1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 13 }}>{u.username} <span style={{ fontSize: 10, color: '#00e676' }}>🎁 Freebet</span></div>
+                        <div style={{ fontSize: 11, color: 'var(--muted)' }}>{u.email} • {u.no_whatsapp || '-'}</div>
+                        <div style={{ fontSize: 11, color: 'var(--muted)' }}>{u.bank} • {u.no_rekening}</div>
+                        <div style={{ fontSize: 10, color: 'var(--muted)' }}>{new Date(u.created_at).toLocaleString('id-ID')}</div>
+                      </div>
+                      <div style={{ fontFamily: 'var(--display)', fontSize: 14, fontWeight: 700, color: 'var(--gold)' }}>
+                        Rp {u.balance?.toLocaleString('id-ID')}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Riwayat Transaksi Freebet */}
+              <div className='card' style={{ padding: 0, overflow: 'hidden' }}>
+                <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', fontWeight: 700, fontSize: 13, color: 'var(--blue)' }}>
+                  📋 Riwayat Pemberian Freebet
+                </div>
+                {!freebetData?.transaksi?.length ? (
+                  <div style={{ textAlign: 'center', padding: 40, color: 'var(--muted)' }}>Belum ada transaksi freebet</div>
+                ) : freebetData.transaksi.map((t: any, i: number) => (
+                  <div key={t.id} style={{ padding: '10px 16px', borderBottom: i < freebetData.transaksi.length-1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 13 }}>{t.users?.username}</div>
+                        <div style={{ fontSize: 11, color: 'var(--muted)' }}>{t.description}</div>
+                        <div style={{ fontSize: 10, color: 'var(--muted)' }}>{new Date(t.created_at).toLocaleString('id-ID')}</div>
+                      </div>
+                      <div style={{ fontFamily: 'var(--display)', fontSize: 14, fontWeight: 700, color: '#00e676' }}>
+                        +Rp {t.amount?.toLocaleString('id-ID')}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+            </div>
+          )}
         </div>
       )}
 
