@@ -26,7 +26,11 @@ export default function Register() {
   useEffect(() => { if (isLoggedIn) navigate('/') }, [isLoggedIn])
 
   useEffect(() => {
-    if (!window.turnstile || !tsRef.current) return
+    if (step !== 2) return
+    if (!tsRef.current) return
+    // Hapus widget lama jika ada
+    if (tsRef.current.innerHTML) tsRef.current.innerHTML = ''
+    if (!window.turnstile) return
     window.turnstile.render(tsRef.current, {
       sitekey: '0x4AAAAAAABkMYinukE8nsd9',
       callback: (token: string) => setTsToken(token),
