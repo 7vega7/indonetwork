@@ -15,10 +15,11 @@ export async function onRequestPost({ request, env }) {
   if (password.length < 6) return err('Password minimal 6 karakter');
 
   const ip = request.headers.get('CF-Connecting-IP');
-  console.log('Register attempt:', { username, email, turnstile_token: turnstile_token?.substring(0,20) });
-  const valid = turnstile_token === 'bypass-dev-2024' ||
-    await verifyTurnstile(turnstile_token, env.TURNSTILE_SECRET_KEY, ip);
-  if (!valid) return err('Verifikasi keamanan gagal');
+  // Verifikasi turnstile - skip jika bypass
+  if (turnstile_token !== 'bypass-dev-2024') {
+    const valid = await verifyTurnstile(turnstile_token, env.TURNSTILE_SECRET_KEY, ip);
+    if (!valid) return err('Verifikasi keamanan gagal. Silakan refresh halaman dan coba lagi.');
+  }
 
   const sb = getSupabase(env);
 
