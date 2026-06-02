@@ -177,7 +177,7 @@ export default function Register() {
           </div>
 
           {/* Turnstile */}
-          <div id="ts-register" style={{ borderRadius: 6, overflow: 'hidden' }} />
+          <div id="ts-register" style={{ minHeight: 65, borderRadius: 6, overflow: 'hidden', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} />
 
           <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%', padding: 13, fontSize: 14, marginTop: 4 }}>
             {loading ? 'Mendaftar...' : '🚀 Daftar Sekarang'}
