@@ -62,8 +62,8 @@ export default function Admin() {
     : user?.role === 'admin'
     ? TAB_ALL.filter(t => !['providers','banner','promosi','settings','logs','export'].includes(t.kode))
     : TAB_ALL
-  const navigateOut = useNavigate()
   const navigate = useNavigate()
+  const navigateOut = navigate
   const [tab, setTab] = useState('dashboard')
   const [stats, setStats] = useState<any>(null)
   const [deposits, setDeposits] = useState<any[]>([])
