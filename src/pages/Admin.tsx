@@ -25,6 +25,7 @@ const TAB_ALL = [
 const TAB = user?.role === 'cs'
   ? TAB_ALL.filter(t => t.kode === 'chat')
   : user?.role === 'admin'
+  ? TAB_ALL.filter(t => !['providers','banner','promosi','settings','logs','export'].includes(t.kode))
   : TAB_ALL
 
 const STATUS_COLOR: Record<string, string> = {
