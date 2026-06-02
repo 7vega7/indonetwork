@@ -26,6 +26,11 @@ export async function onRequestPost({ request, env }) {
 
   await sb.from('users').update({ last_login: new Date().toISOString() }).eq('id', user.id);
 
+  await sb.from('users').update({
+    last_login: new Date().toISOString(),
+    login_count: (user.login_count || 0) + 1,
+  }).eq('id', user.id)
+
   const token = await signJWT({ sub: user.id, username: user.username, role: user.role }, env.JWT_SECRET);
 
   return ok({

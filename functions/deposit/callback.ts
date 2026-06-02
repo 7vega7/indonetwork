@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { getSupabase, nexus } from '../_utils';
+import { getSupabase, nexus, notifAdmin } from '../_utils';
 
 export async function onRequestPost({ request, env }) {
   let body

@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 import AdminChatEmbed from '../components/AdminChatEmbed'
 import ImageUpload from '../components/ImageUpload'
 
-const TAB = [
+const TAB_ALL = [
   { kode: 'dashboard', label: '📊 Dashboard' },
   { kode: 'deposit', label: '💰 Deposit' },
   { kode: 'withdraw', label: '💸 Withdraw' },
@@ -18,7 +18,14 @@ const TAB = [
   { kode: 'promosi', label: '🎁 Promosi' },
   { kode: 'settings', label: '⚙️ Settings' },
   { kode: 'chat', label: '💬 Live Chat' },
+  { kode: 'logs', label: '📋 Log Aktivitas' },
+  { kode: 'export', label: '📥 Export' },
 ]
+
+const TAB = user?.role === 'cs'
+  ? TAB_ALL.filter(t => t.kode === 'chat')
+  : user?.role === 'admin'
+  : TAB_ALL
 
 const STATUS_COLOR: Record<string, string> = {
   pending: 'var(--gold)', success: '#00e676', sukses: '#00e676',
@@ -65,6 +72,17 @@ export default function Admin() {
   const [providers, setProviders] = useState<any[]>([])
   const [banners, setBanners] = useState<any[]>([])
   const [promosiList, setPromosiList] = useState<any[]>([])
+  const [logs, setLogs] = useState<any[]>([])
+  const [notifList, setNotifList] = useState<any[]>([])
+  const [notifCount, setNotifCount] = useState(0)
+  const [modalBan, setModalBan] = useState<any>(null)
+  const [modalResetPass, setModalResetPass] = useState<any>(null)
+  const [modalRole, setModalRole] = useState<any>(null)
+  const [banReason, setBanReason] = useState('')
+  const [resetPassBaru, setResetPassBaru] = useState('')
+  const [exportTipe, setExportTipe] = useState('transaksi')
+  const [exportDari, setExportDari] = useState(new Date(Date.now()-30*24*60*60*1000).toISOString().split('T')[0])
+  const [exportSampai, setExportSampai] = useState(new Date().toISOString().split('T')[0])
   const [settingsList, setSettingsList] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [cari, setCari] = useState('')
@@ -78,8 +96,11 @@ export default function Admin() {
   const isMobile = window.innerWidth < 768
 
   useEffect(() => {
-    if (user?.role !== 'admin') { navigate('/'); return }
+    undefined
     muatStats()
+    muatNotif()
+    const notifInterval = setInterval(muatNotif, 30000)
+    return () => clearInterval(notifInterval)
   }, [])
 
   useEffect(() => {
@@ -90,6 +111,7 @@ export default function Admin() {
     else if (tab === 'banner') muatBanners()
     else if (tab === 'promosi') muatPromosi()
     else if (tab === 'settings') muatSettings()
+    else if (tab === 'logs') muatLogs()
   }, [tab, statusFilter])
 
   const muatStats = async () => { const d = await apiCall('/admin/stats'); setStats(d.stats) }
@@ -105,6 +127,8 @@ export default function Admin() {
   const muatUsers = async () => { setLoading(true); const d = await apiCall(`/admin/users?cari=${cari}`); setUsers(d.users || []); setLoading(false) }
   const muatProviders = async () => { setLoading(true); const d = await apiCall('/admin/providers'); setProviders(d.providers || []); setLoading(false) }
   const muatBanners = async () => { setLoading(true); const d = await apiCall('/admin/banners'); setBanners(d.banners || []); setLoading(false) }
+  const muatLogs = async () => { setLoading(true); const d = await apiCall('/admin/logs'); setLogs(d.logs || []); setLoading(false) }
+  const muatNotif = async () => { const d = await apiCall('/admin/notifikasi'); setNotifList(d.notifikasi || []); setNotifCount(d.total || 0) }
   const muatSettings = async () => { setLoading(true); const d = await apiCall('/admin/settings'); setSettingsList(d.settings || []); setLoading(false) }
   const muatPromosi = async () => { setLoading(true); const d = await apiCall('/admin/promosi'); setPromosiList(d.promosi || []); setLoading(false) }
 
@@ -190,7 +214,7 @@ export default function Admin() {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div style={{ fontFamily: 'var(--display)', fontSize: isMobile ? 16 : 20, fontWeight: 900, background: 'linear-gradient(135deg,#ffd700,#ff9500)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-          👑 ADMIN PANEL
+          👑 {user?.role === 'owner' ? 'OWNER' : user?.role === 'cs' ? 'CS' : 'ADMIN'} PANEL
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={() => navigateOut('/')} style={{ padding: '6px 12px', fontSize: 11, background: 'rgba(0,200,255,0.1)', border: '1px solid var(--blue)', color: 'var(--blue)', borderRadius: 6, cursor: 'pointer', fontWeight: 600 }}>🌐 Website</button>
@@ -345,7 +369,7 @@ export default function Admin() {
                         {u.username[0].toUpperCase()}
                       </div>
                       <div>
-                        <div style={{ fontWeight: 700, fontSize: 13 }}>{u.username} {u.role === 'admin' && <span style={{ fontSize: 10, color: 'var(--gold)' }}>👑</span>}</div>
+                        <div style={{ fontWeight: 700, fontSize: 13 }}>{u.username} {u.role === 'owner' && <span style={{ fontSize: 10, color: 'var(--gold)' }}>👑</span>}{u.role === 'admin' && <span style={{ fontSize: 10, color: 'var(--blue)' }}>🛡️</span>}{u.role === 'cs' && <span style={{ fontSize: 10, color: 'var(--purple)' }}>🎧</span>}{u.ban_reason && <span style={{ fontSize: 10, color: 'var(--pink)' }}> [BANNED]</span>}</div>
                         <div style={{ fontSize: 11, color: 'var(--muted)' }}>{u.email}</div>
                         <div style={{ fontSize: 10, color: u.is_active ? '#00e676' : 'var(--pink)' }}>{u.is_active ? '● Aktif' : '● Nonaktif'}</div>
                       </div>
@@ -354,6 +378,13 @@ export default function Admin() {
                       <div style={{ fontFamily: 'var(--display)', fontSize: 14, fontWeight: 700, color: 'var(--gold)' }}>Rp {u.balance.toLocaleString('id-ID')}</div>
                       <div style={{ display: 'flex', gap: 4, marginTop: 6, justifyContent: 'flex-end' }}>
                         <button onClick={() => setModalUser(u)} style={{ padding: '4px 10px', fontSize: 10, background: 'rgba(0,200,255,0.1)', border: '1px solid var(--blue)', color: 'var(--blue)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>+ Saldo</button>
+                        <button onClick={() => { setModalResetPass(u); setResetPassBaru('') }} style={{ padding: '4px 10px', fontSize: 10, background: 'rgba(255,215,0,0.1)', border: '1px solid var(--gold)', color: 'var(--gold)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>🔑</button>
+                        {user?.role === 'owner' && u.role !== 'owner' && (
+                          <button onClick={() => setModalRole(u)} style={{ padding: '4px 10px', fontSize: 10, background: 'rgba(123,47,255,0.1)', border: '1px solid var(--purple)', color: 'var(--purple)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>👑</button>
+                        )}
+                        {u.role !== 'admin' && u.role !== 'owner' && (
+                          <button onClick={() => { setModalBan(u); setBanReason('') }} style={{ padding: '4px 10px', fontSize: 10, background: 'rgba(255,45,120,0.1)', border: '1px solid var(--pink)', color: 'var(--pink)', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>🚫 Ban</button>
+                        )}
                         {u.role !== 'admin' && (
                           <button onClick={() => aksiBulkUser(u.is_active ? 'nonaktifkan' : 'aktifkan', u.id)}
                             style={{ padding: '4px 10px', fontSize: 10, background: u.is_active ? 'rgba(255,45,120,0.1)' : 'rgba(0,230,118,0.1)', border: `1px solid ${u.is_active ? 'var(--pink)' : '#00e676'}`, color: u.is_active ? 'var(--pink)' : '#00e676', borderRadius: 4, cursor: 'pointer', fontWeight: 700 }}>

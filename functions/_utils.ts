@@ -95,3 +95,22 @@ export async function verifyTurnstile(token, secretKey, ip) {
   const data = await res.json();
   return data.success === true;
 }
+
+export async function logAdmin(env: any, adminAuth: any, aksi: string, targetId?: string, targetTipe?: string, detail?: any, ip?: string) {
+  try {
+    const sb = getSupabase(env)
+    await sb.from('admin_logs').insert({
+      admin_id: adminAuth.sub,
+      admin_username: adminAuth.username,
+      aksi, target_id: targetId, target_tipe: targetTipe,
+      detail: detail || null, ip: ip || null,
+    })
+  } catch {}
+}
+
+export async function notifAdmin(env: any, tipe: string, judul: string, pesan?: string, data?: any) {
+  try {
+    const sb = getSupabase(env)
+    await sb.from('notifikasi').insert({ tipe, judul, pesan, data: data || null })
+  } catch {}
+}
