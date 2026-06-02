@@ -41,7 +41,7 @@ export const useBrand = create<BrandStore>((set) => ({
   loaded: false,
   load: async () => {
     try {
-      const res = await fetch('/brand')
+      const res = await fetch('/api/brand')
       const data = await res.json()
       if (data.status === 1) {
         set({ ...data.brand, loaded: true })

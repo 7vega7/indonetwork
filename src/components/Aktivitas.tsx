@@ -30,7 +30,7 @@ export default function Aktivitas({ mobile = false }: { mobile?: boolean }) {
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (!token) return
-    fetch('/aktivitas', {
+    fetch('/api/aktivitas', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(r => r.json())

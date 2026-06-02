@@ -56,7 +56,7 @@ export default function Beranda() {
 
   useEffect(() => {
     // Load banners dari database
-    fetch('/banners')
+    fetch('/api/banners')
       .then(r => r.json())
       .then(res => { if (res.banners?.length > 0) setBanners(res.banners) })
       .catch(() => {})

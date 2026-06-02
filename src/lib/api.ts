@@ -46,5 +46,5 @@ export const adminApi = {
 }
 
 export const aktivitasApi = {
-  get: () => get<any>('/aktivitas'),
+  get: () => get<any>('/api/aktivitas'),
 }
