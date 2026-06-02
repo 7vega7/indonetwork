@@ -27,7 +27,7 @@ export default function AdminLogin() {
         password,
         turnstile_token: 'bypass-dev-2024'
       })
-      if (res.user?.role !== 'admin') {
+      if (!['admin','owner','cs'].includes(res.user?.role || '')) {
         toast.error('Akses ditolak - bukan admin')
         return
       }
