@@ -29,6 +29,7 @@ const STATUS_LABEL: Record<string, string> = {
 export default function Withdraw() {
   const { user, syncSaldo } = useAuth()
   const navigate = useNavigate()
+  const { min_withdraw, max_withdraw } = useBrand()
   const [profil, setProfil] = useState<any>(null)
   const [riwayat, setRiwayat] = useState<any[]>([])
   const [tab, setTab] = useState<'form' | 'riwayat'>('form')
