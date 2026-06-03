@@ -204,7 +204,7 @@ export default function Withdraw() {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%', padding: 13, fontSize: 15 }}>
+            <button type="submit" className="btn btn-primary" disabled={loading || (turnover && !turnover.tercapai && turnover.total_deposit > 0)} style={{ width: '100%', padding: 13, fontSize: 15 }}>
               {loading ? 'Memproses...' : 'KIRIM PERMINTAAN WITHDRAW'}
             </button>
           </form>
