@@ -16,7 +16,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
 
     companion object {
-        const val BASE_URL = "https://kedai45.com"
+        const val BASE_URL = "https://indonetwork.pages.dev"
         const val REGISTER_PATH = "/daftar"
         const val REF_CODE = "app"
     }
