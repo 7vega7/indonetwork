@@ -39,6 +39,41 @@ jobs:
             "platforms;android-35" \
             "build-tools;35.0.0" 2>/dev/null
 
+      - name: Generate Icons
+        run: |
+          pip install pillow -q
+          python3 << 'PYEOF'
+          from PIL import Image, ImageDraw
+          import os
+
+          sizes = {
+              'mipmap-mdpi': 48,
+              'mipmap-hdpi': 72,
+              'mipmap-xhdpi': 96,
+              'mipmap-xxhdpi': 144,
+              'mipmap-xxxhdpi': 192,
+          }
+
+          for folder, size in sizes.items():
+              path = f'android/app/src/main/res/{folder}'
+              os.makedirs(path, exist_ok=True)
+              
+              # Buat icon dengan gradient
+              img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+              draw = ImageDraw.Draw(img)
+              
+              # Background circle
+              draw.ellipse([0, 0, size-1, size-1], fill=(123, 47, 255, 255))
+              
+              # Text K
+              font_size = size // 2
+              draw.text((size//4, size//6), 'K', fill='white')
+              
+              img.save(f'{path}/ic_launcher.png')
+              img.save(f'{path}/ic_launcher_round.png')
+              print(f'Created {path} ({size}x{size})')
+          PYEOF
+
       - name: Generate Keystore
         run: |
           keytool -genkey -v \
