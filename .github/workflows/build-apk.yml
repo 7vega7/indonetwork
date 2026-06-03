@@ -39,19 +39,38 @@ jobs:
             "platforms;android-35" \
             "build-tools;35.0.0" 2>/dev/null
 
+      - name: Generate Keystore
+        run: |
+          keytool -genkey -v \
+            -keystore android/kedai45.keystore \
+            -alias kedai45 \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass kedai45pass \
+            -keypass kedai45pass \
+            -dname "CN=Kedai45, OU=App, O=Kedai45, L=Jakarta, S=DKI, C=ID"
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
         working-directory: android
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
         working-directory: android
 
-      - name: Find APK
-        run: find android -name "*.apk" -type f
+      - name: Sign APK
+        run: |
+          $ANDROID_HOME/build-tools/35.0.0/apksigner sign \
+            --ks android/kedai45.keystore \
+            --ks-key-alias kedai45 \
+            --ks-pass pass:kedai45pass \
+            --key-pass pass:kedai45pass \
+            --out android/app/build/outputs/apk/release/kedai45-signed.apk \
+            android/app/build/outputs/apk/release/app-release-unsigned.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: kedai45-apk
-          path: android/app/build/outputs/apk/**/*.apk
+          path: android/app/build/outputs/apk/release/kedai45-signed.apk
