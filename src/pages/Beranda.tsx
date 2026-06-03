@@ -118,7 +118,7 @@ export default function Beranda() {
           <div style={{ display: 'inline-block', background: 'var(--pink)', color: 'white', fontSize: 9, padding: '2px 8px', borderRadius: 3, fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>{s.tag}</div>
           <div style={{ fontFamily: 'var(--display)', fontSize: 22, fontWeight: 900, lineHeight: 1.1, background: 'linear-gradient(135deg,#00c8ff,#ffd700)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: 6, whiteSpace: 'pre-line' }}>{s.judul}</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>{s.sub}</div>
-          <button className="btn btn-primary" style={{ padding: '6px 16px', fontSize: 12 }} onClick={() => navigate(isLoggedIn ? (s.link || '/deposit') : '/daftar')}>{s.aksi}</button>
+          <button className="btn btn-primary" style={{ padding: '6px 16px', fontSize: 12 }} onClick={() => { if (s.link) { if (s.link.startsWith('http')) window.open(s.link, '_blank'); else navigate(s.link); } else navigate(isLoggedIn ? '/deposit' : '/daftar') }}>{s.aksi}</button>
         </div>
         <div style={{ position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 5 }}>
           {slideData.map((_, i) => (
@@ -269,7 +269,7 @@ export default function Beranda() {
               <div style={{ display: 'inline-block', background: 'var(--pink)', color: 'white', fontSize: 10, padding: '3px 10px', borderRadius: 3, fontWeight: 700, letterSpacing: 2, marginBottom: 12 }}>{s.tag}</div>
               <div style={{ fontFamily: 'var(--display)', fontSize: 28, fontWeight: 900, lineHeight: 1.1, background: 'linear-gradient(135deg,#00c8ff,#ffd700)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: 10, whiteSpace: 'pre-line' }}>{s.judul}</div>
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginBottom: 16 }}>{s.sub}</div>
-              <button className="btn btn-primary" onClick={() => navigate(isLoggedIn ? (s.link || '/deposit') : '/daftar')}>{s.aksi}</button>
+              <button className="btn btn-primary" onClick={() => { if (s.link) { if (s.link.startsWith('http')) window.open(s.link, '_blank'); else navigate(s.link); } else navigate(isLoggedIn ? '/deposit' : '/daftar') }}>{s.aksi}</button>
             </div>
             <div style={{ position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6 }}>
               {slideData.map((_, i) => (
