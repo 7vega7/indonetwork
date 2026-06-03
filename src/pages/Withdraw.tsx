@@ -118,42 +118,6 @@ export default function Withdraw() {
         ))}
       </div>
 
-      {/* Widget Turnover */}
-      {tab === 'form' && turnover && (
-        <div className='card' style={{ marginBottom: 16, borderColor: turnover.tercapai ? 'rgba(0,230,118,0.3)' : 'rgba(255,215,0,0.3)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <div style={{ fontWeight: 700, fontSize: 13, color: turnover.tercapai ? '#00e676' : 'var(--gold)' }}>
-              {turnover.tercapai ? '✅ Turnover Tercapai!' : '⏳ Progress Turnover'}
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--muted)' }}>{turnover.persen}%</div>
-          </div>
-
-          {/* Progress bar */}
-          <div style={{ height: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 4, overflow: 'hidden', marginBottom: 10 }}>
-            <div style={{ height: '100%', width: turnover.persen + '%', background: turnover.tercapai ? '#00e676' : 'linear-gradient(90deg,var(--gold),var(--pink))', borderRadius: 4, transition: 'width 0.5s ease' }} />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-            {[
-              { label: 'Total Deposit', nilai: 'Rp ' + (turnover.total_deposit || 0).toLocaleString('id-ID'), warna: 'var(--blue)' },
-              { label: 'Sudah Bet', nilai: 'Rp ' + Math.round(turnover.total_turnover || 0).toLocaleString('id-ID'), warna: '#00e676' },
-              { label: 'Sisa Target', nilai: turnover.tercapai ? '✅ Selesai' : 'Rp ' + Math.round(turnover.kurang || 0).toLocaleString('id-ID'), warna: turnover.tercapai ? '#00e676' : 'var(--pink)' },
-            ].map(s => (
-              <div key={s.label} style={{ textAlign: 'center', background: 'rgba(255,255,255,0.03)', borderRadius: 8, padding: '8px 4px' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: s.warna, marginBottom: 2 }}>{s.nilai}</div>
-                <div style={{ fontSize: 9, color: 'var(--muted)' }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-
-          {!turnover.tercapai && (
-            <div style={{ marginTop: 10, fontSize: 11, color: 'var(--muted)', textAlign: 'center' }}>
-              Selesaikan turnover 1x deposit untuk bisa withdraw
-            </div>
-          )}
-        </div>
-      )}
-
       {tab === 'form' && (
         <div className="card fade-in">
           <h1 style={{ fontFamily: 'var(--display)', fontSize: 18, fontWeight: 900, marginBottom: 6, background: 'linear-gradient(135deg,#00c8ff,#7b2fff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
@@ -204,7 +168,7 @@ export default function Withdraw() {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary" disabled={loading || (turnover && !turnover.tercapai && turnover.total_deposit > 0)} style={{ width: '100%', padding: 13, fontSize: 15 }}>
+            <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%', padding: 13, fontSize: 15 }}>
               {loading ? 'Memproses...' : 'KIRIM PERMINTAAN WITHDRAW'}
             </button>
           </form>
