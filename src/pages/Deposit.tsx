@@ -6,7 +6,6 @@ import toast from 'react-hot-toast'
 
 const METODE_LIST = [
   { kode: 'QRIS', label: 'QRIS', icon: '📱', grup: 'E-Money' },
-  { kode: 'DANA', label: 'DANA', icon: '💙', grup: 'E-Money' },
   { kode: 'BRI', label: 'BRI', icon: '🔵', grup: 'VA Transfer' },
   { kode: 'BNI', label: 'BNI', icon: '🟠', grup: 'VA Transfer' },
   { kode: 'PERMATA', label: 'Permata', icon: '💎', grup: 'VA Transfer' },
