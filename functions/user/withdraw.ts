@@ -53,9 +53,10 @@ export async function onRequestPost({ request, env }) {
         page: 0,
         perPage: 1000,
       })
-      if (log?.status === 1 && Array.isArray(log.data)) {
-        for (const r of log.data) {
-          totalTurnover += parseFloat(r.bet || r.total_bet || r.turnover || 0)
+      const arr = log?.[tipe] || log?.data || []
+      if (log?.status === 1 && Array.isArray(arr)) {
+        for (const r of arr) {
+          totalTurnover += parseFloat(r.bet_money || r.bet || r.total_bet || 0)
         }
       }
     }
