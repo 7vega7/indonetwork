@@ -31,12 +31,44 @@ export async function onRequestPost({ request, env }) {
 
   const { data: user } = await sb
     .from('users')
-    .select('balance, profil_lengkap, username')
+    .select('balance, profil_lengkap, username, created_at')
     .eq('id', auth.sub)
     .single();
 
   if (!user) return err('Pengguna tidak ditemukan', 404);
   if (!user.profil_lengkap) return err('Lengkapi profil terlebih dahulu');
+
+  // Cek turnover dari NexusGGR
+  try {
+    const now = new Date()
+    const start = new Date(user.created_at).toISOString().replace('T', ' ').substring(0, 19)
+    const end = now.toISOString().replace('T', ' ').substring(0, 19)
+    let totalTurnover = 0
+    for (const tipe of ['slot', 'live', 'crash']) {
+      const log = await nexus(env, {
+        method: 'get_game_log',
+        user_code: user.username,
+        game_type: tipe,
+        start, end,
+        page: 0,
+        perPage: 1000,
+      })
+      if (log?.status === 1 && Array.isArray(log.data)) {
+        for (const r of log.data) {
+          totalTurnover += parseFloat(r.bet || r.total_bet || r.turnover || 0)
+        }
+      }
+    }
+    // Ambil total deposit sukses
+    const { data: deposits } = await sb.from('deposits')
+      .select('amount').eq('user_id', auth.sub).eq('status', 'sukses')
+    const totalDeposit = deposits?.reduce((s: number, d: any) => s + (d.amount || 0), 0) || 0
+
+    if (totalDeposit > 0 && totalTurnover < totalDeposit) {
+      const kurang = (totalDeposit - totalTurnover).toLocaleString('id-ID')
+      return err('Turnover belum tercapai. Kamu masih perlu bet Rp ' + kurang + ' lagi sebelum bisa withdraw.')
+    }
+  } catch(e) {}
 
   // Ambil saldo real dari NexusGGR
   let saldoAktual = user.balance;
