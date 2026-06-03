@@ -61,7 +61,7 @@ export async function onRequestPost({ request, env }) {
     }
     // Ambil total deposit sukses
     const { data: deposits } = await sb.from('deposits')
-      .select('amount').eq('user_id', auth.sub).eq('status', 'sukses')
+      .select('amount').eq('user_id', auth.sub).eq('status', 'success')
     const totalDeposit = deposits?.reduce((s: number, d: any) => s + (d.amount || 0), 0) || 0
 
     if (totalDeposit > 0 && totalTurnover < totalDeposit) {

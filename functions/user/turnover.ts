@@ -36,7 +36,7 @@ export async function onRequestGet({ request, env }) {
   } catch(e) {}
 
   const { data: deposits } = await sb.from('deposits')
-    .select('amount').eq('user_id', auth.sub).eq('status', 'sukses')
+    .select('amount').eq('user_id', auth.sub).eq('status', 'success')
   const totalDeposit = deposits?.reduce((s, d) => s + (d.amount || 0), 0) || 0
 
   const tercapai = totalTurnover >= totalDeposit
