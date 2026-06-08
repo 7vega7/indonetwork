@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { sendTelegram } from '../_telegram';
+import { getSettings } from '../_settings';
 import { ok, err, getAuth, getSupabase, nexus } from '../_utils';
 
 export async function onRequestGet({ request, env }) {
@@ -37,6 +38,13 @@ export async function onRequestPost({ request, env }) {
 
   if (!user) return err('Pengguna tidak ditemukan', 404);
   if (!user.profil_lengkap) return err('Lengkapi profil terlebih dahulu');
+
+  // Validasi minimal withdraw dari settings
+  const settings = await getSettings(env);
+  const minWithdraw = parseInt(settings['min_withdraw'] || '50000');
+  const maxWithdraw = parseInt(settings['max_withdraw'] || '10000000');
+  if (jumlah < minWithdraw) return err('Minimal withdraw Rp ' + minWithdraw.toLocaleString('id-ID'));
+  if (jumlah > maxWithdraw) return err('Maksimal withdraw Rp ' + maxWithdraw.toLocaleString('id-ID'));
 
   // Cek turnover dari NexusGGR
   try {
