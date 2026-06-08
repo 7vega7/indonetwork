@@ -67,7 +67,7 @@ export default function Withdraw() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const nominal = parseInt(jumlah.replace(/\D/g, ''))
-    if (!nominal || nominal < 50000) { toast.error('Minimal withdraw Rp 50.000'); return }
+    if (!nominal || nominal < (min_withdraw || 50000)) { toast.error('Minimal withdraw Rp ' + (min_withdraw || 50000).toLocaleString('id-ID')); return }
     if (nominal > (user?.saldo || 0)) { toast.error('Saldo tidak mencukupi'); return }
 
     setLoading(true)
